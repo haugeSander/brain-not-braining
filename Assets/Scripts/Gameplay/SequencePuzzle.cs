@@ -95,12 +95,12 @@ namespace BrainNotBraining.Gameplay
             foreach (string button in currentSequence)
             {
                 if (sequenceText != null)
-                    sequenceText.text = button;
+                    sequenceText.text = button; // Show the button on screen
                 Debug.Log($"Show button: {button}");
 
                 yield return new WaitForSeconds(buttonDisplayDuration);
                 if (sequenceText != null)
-                    sequenceText.text = "";
+                    sequenceText.text = ""; // Clear after delay
                 yield return new WaitForSeconds(0.3f);
             }
             isShowingSequence = false;
@@ -109,6 +109,8 @@ namespace BrainNotBraining.Gameplay
             if (sequenceText != null)
                 sequenceText.text = "Your turn!";
             Debug.Log("Your turn! Repeat the sequence.");
+            
+
         }
 
         /// <summary>

@@ -52,6 +52,9 @@ namespace BrainNotBraining.Core
         {
             _currentState = GameState.PLAYING;
             Debug.Log("GameManager is ready");
+
+            // Automatically load Level 0 for testing
+            LoadLevel("Level_0_Brainstem");
         }
 
         // === PUBLIC API ===
