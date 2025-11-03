@@ -30,24 +30,30 @@ namespace BrainNotBraining.Player
             // TODO: Get components
             // characterController = GetComponent<CharacterController>();
             // inputActions = new PlayerInputActions();
+            characterController = GetComponent<CharacterController>();
+            inputActions = new PlayerInputActions();
         }
 
         private void OnEnable()
         {
             // TODO: Enable input actions
             // inputActions.Enable();
+            inputActions.Enable();
 
             // TODO: Subscribe to Move input
             // inputActions.Player.Move.performed += OnMove;
             // inputActions.Player.Move.canceled += OnMove;
+            inputActions.Player.Move.performed += OnMove;
+            inputActions.Player.Move.canceled += OnMove;
         }
 
         private void OnDisable()
         {
             // TODO: Disable and unsubscribe
-            // inputActions.Disable();
-            // inputActions.Player.Move.performed -= OnMove;
-            // inputActions.Player.Move.canceled -= OnMove;
+            inputActions.Disable();
+            inputActions.Player.Move.performed -= OnMove;
+            inputActions.Player.Move.canceled -= OnMove;
+
         }
 
         private void Update()
@@ -62,6 +68,10 @@ namespace BrainNotBraining.Player
             //    Vector3 move = new Vector3(moveInput.x, 0, moveInput.y);
             // 3. Apply movement:
             //    characterController.Move(move * moveSpeed * Time.deltaTime);
+
+            if (!ProgressionManager.Instance.CanPlayerMove()) return;
+            Vector3 move = new Vector3(moveInput.x, 0, moveInput.y);
+            characterController.Move(move * moveSpeed * Time.deltaTime);
         }
 
         // === INPUT HANDLERS ===
@@ -71,6 +81,8 @@ namespace BrainNotBraining.Player
             // TODO: Read movement input
             // moveInput = context.ReadValue<Vector2>();
             // This captures WASD input as a 2D vector
+
+            moveInput = context.ReadValue<Vector2>();
         }
     }
 }
