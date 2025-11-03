@@ -62,6 +62,13 @@ namespace BrainNotBraining.Gameplay
         protected override void Start()
         {
             base.Start();
+
+            // Start the heartbeat when Level 0 begins
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlayHeartbeat();
+            }
+
             StartNextSequence();
         }
 
@@ -177,6 +184,10 @@ namespace BrainNotBraining.Gameplay
         {
             base.Solve();
             isWaitingForInput = false;
+
+            // Optional: Play a success sound effect when puzzle completes
+            // You can add a success AudioClip field and call AudioManager.Instance.PlaySFX(successClip) here
+
             GameManager.Instance.OnLevelComplete();
             Debug.Log("Level 0 (Brainstem) awakened!");
         }
