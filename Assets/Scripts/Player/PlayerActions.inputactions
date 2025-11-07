@@ -1,0 +1,115 @@
+{
+    "version": 1,
+    "name": "PlayerActions",
+    "maps": [
+        {
+            "name": "Level0PlayerActions",
+            "id": "c9f62c5e-e8e9-4b8d-a2ac-cc772afc9705",
+            "actions": [
+                {
+                    "name": "SequenceInputSpace",
+                    "type": "Button",
+                    "id": "dc257db7-5086-4f03-98c2-f60d0d91e835",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "SequenceInputW",
+                    "type": "Button",
+                    "id": "d50dac87-9abc-4ea4-81ae-3d9f6b8ce090",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "SequenceInputA",
+                    "type": "Button",
+                    "id": "97425b92-f07b-44ae-85f6-d26be5184cb3",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "SequenceInputS",
+                    "type": "Button",
+                    "id": "2ff00f1c-b332-4b7d-b643-cccac1a807e7",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "SequenceInputD",
+                    "type": "Button",
+                    "id": "6b2fa440-55d7-47be-bbfc-1c298d6e9719",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "bdf53888-e084-4389-a4de-52c7eda56729",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SequenceInputSpace",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "4d91c73f-857a-4864-9955-7448780ff5ca",
+                    "path": "<Keyboard>/w",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SequenceInputW",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a654f95e-8a7a-48de-a394-c8c6596182d4",
+                    "path": "<Keyboard>/a",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SequenceInputA",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b7aac5c2-225b-44e5-99c2-a55c136e80fb",
+                    "path": "<Keyboard>/s",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SequenceInputS",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "9e35436d-e6ad-4e86-8085-5bed600f9458",
+                    "path": "<Keyboard>/d",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SequenceInputD",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}
