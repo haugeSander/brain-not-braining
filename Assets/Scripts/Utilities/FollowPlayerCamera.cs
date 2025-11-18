@@ -3,21 +3,24 @@ using UnityEngine;
 
 public class FollowPlayerCamera : MonoBehaviour
 {
-    //distance from player
-    UnityEngine.Vector3 Offset;
 
-    UnityEngine.Vector3 NewplayerPosition;
-    
+
     public GameObject Player;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-       Offset = Player.transform.position - transform.position; 
-    }
+    public float turnSpeed = 2.0f;
+   
 
-    // Update is called once per frame
-    void Update()
-    {
-        transform.position = Player.transform.position - Offset;
-    }
+	
+    private float horizontal = 0;
+  
+	
+	void Start () {
+	}
+	
+	void LateUpdate()
+	{
+		horizontal = Input.GetAxis("Mouse X");  
+        transform.position = Player.transform.position;
+        transform.Rotate(0, horizontal * turnSpeed, 0);
+
+	}
 }

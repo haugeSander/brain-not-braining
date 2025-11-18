@@ -31,12 +31,5 @@ public class Level3PlayerMovement : MonoBehaviour
         axis = input.Get<UnityEngine.Vector2>();
     }
      
-     void OnJump()
-    {
-        //ball on the ground
-        if(Rigidbody.linearVelocity.y == 0)
-        {
-            Rigidbody.AddForce(UnityEngine.Vector3.up * JumpForce,ForceMode.Impulse);
-        }
-    }
+
 }
