@@ -14,13 +14,13 @@ namespace BrainNotBraining.Gameplay
         // === PUZZLE CONFIGURATION ===
         [Header("Sequence Settings")]
         [Tooltip("Number of sequences player must complete to solve puzzle")]
-        [SerializeField] private int numberOfSequences = 3;
+        public int numberOfSequences = 3;
 
         [Tooltip("How many buttons in each sequence")]
-        [SerializeField] private int sequenceLength = 4;
+        public int sequenceLength = 4;
 
         [Tooltip("Time delay (seconds) to show each button in the sequence")]
-        [SerializeField] private float buttonDisplayDuration = 1.0f;
+        public float buttonDisplayDuration = 1.0f;
 
         [Tooltip("Available buttons for sequences (W, A, S, D, Space)")]
         private readonly List<string> availableButtons = new List<string> { "W", "A", "S", "D", "Space" };
@@ -32,8 +32,6 @@ namespace BrainNotBraining.Gameplay
         private bool isShowingSequence = false;                      // Are we displaying the sequence?
         private bool isWaitingForInput = false;                      // Is player's turn to input?
 
-        // === INPUT SYSTEM ===
-        private PlayerInputActions inputActions;
 
         // === UI REFERENCE ===
         [Header("UI")]
@@ -42,22 +40,6 @@ namespace BrainNotBraining.Gameplay
 
         // === UNITY LIFECYCLE ===
 
-        private void Awake()
-        {
-            inputActions = new PlayerInputActions();
-        }
-
-        private void OnEnable()
-        {
-            inputActions.Enable();
-            inputActions.Player.SequenceInput.performed += OnSequenceInput;
-        }
-
-        private void OnDisable()
-        {
-            inputActions.Disable();
-            inputActions.Player.SequenceInput.performed -= OnSequenceInput;
-        }
 
         protected override void Start()
         {
@@ -116,26 +98,54 @@ namespace BrainNotBraining.Gameplay
             if (sequenceText != null)
                 sequenceText.text = "Your turn!";
             Debug.Log("Your turn! Repeat the sequence.");
-            
+
 
         }
 
         /// <summary>
         /// Called when player presses a sequence input key (W, A, S, D, Space).
         /// </summary>
-        private void OnSequenceInput(InputAction.CallbackContext context)
+        // public void OnSequenceInput(CallbackContext context)
+        // {
+        //     if (!isWaitingForInput) return;
+        //     string pressedKey = context.control.name;
+        //     pressedKey = pressedKey.ToUpper();
+        //     if (pressedKey == "SPACE") pressedKey = "Space";
+
+        //     playerInput.Add(pressedKey);
+        //     Debug.Log($"Player pressed: {pressedKey}");
+
+        //     CheckPuzzleConditions();
+        // }
+
+        public void OnSequenceInputSpace()
         {
-            if (!isWaitingForInput) return;
-            string pressedKey = context.control.name;
-            pressedKey = pressedKey.ToUpper();
-            if (pressedKey == "SPACE") pressedKey = "Space";
-
-            playerInput.Add(pressedKey);
-            Debug.Log($"Player pressed: {pressedKey}");
-
+            playerInput.Add("Space");
             CheckPuzzleConditions();
         }
 
+        public void OnSequenceInputA()
+        {
+            playerInput.Add("A");
+            CheckPuzzleConditions();
+        }
+        public void OnSequenceInputS()
+        {
+            playerInput.Add("S");
+            CheckPuzzleConditions();
+        }
+        public void OnSequenceInputW()
+        {
+            playerInput.Add("W");
+            CheckPuzzleConditions();
+        }
+        public void OnSequenceInputD()
+        {
+            playerInput.Add("D");
+            CheckPuzzleConditions();
+        }
+        
+       
         /// <summary>
         /// Checks if player's input matches the sequence so far.
         /// </summary>
