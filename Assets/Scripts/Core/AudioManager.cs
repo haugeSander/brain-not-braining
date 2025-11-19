@@ -56,6 +56,16 @@ namespace BrainNotBraining.Core
         /// </summary>
         private void InitializeAudioSources()
         {
+            // Try to load heartbeat clip from Resources if not assigned
+            if (heartbeatClip == null)
+            {
+                heartbeatClip = Resources.Load<AudioClip>("Audio/heart-beat");
+                if (heartbeatClip == null)
+                {
+                    Debug.LogWarning("AudioManager: Could not load heartbeat clip. Please assign it in Inspector or place it in Resources/Audio/heart-beat");
+                }
+            }
+
             if (heartbeatSource == null)
             {
                 heartbeatSource = gameObject.AddComponent<AudioSource>();

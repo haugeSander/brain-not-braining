@@ -54,6 +54,33 @@ namespace BrainNotBraining.Gameplay
             StartNextSequence();
         }
 
+        private void Update()
+        {
+            if (!isWaitingForInput) return;
+
+            // Direct keyboard polling for sequence input
+            if (Keyboard.current.wKey.wasPressedThisFrame)
+            {
+                OnSequenceInputW();
+            }
+            else if (Keyboard.current.aKey.wasPressedThisFrame)
+            {
+                OnSequenceInputA();
+            }
+            else if (Keyboard.current.sKey.wasPressedThisFrame)
+            {
+                OnSequenceInputS();
+            }
+            else if (Keyboard.current.dKey.wasPressedThisFrame)
+            {
+                OnSequenceInputD();
+            }
+            else if (Keyboard.current.spaceKey.wasPressedThisFrame)
+            {
+                OnSequenceInputSpace();
+            }
+        }
+
         // === PUZZLE LOGIC ===
 
         /// <summary>
