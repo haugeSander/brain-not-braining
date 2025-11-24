@@ -26,12 +26,36 @@ namespace BrainNotBraining.Core
         [Tooltip("AudioSource for music")]
         public AudioSource musicSource;
 
+        [Tooltip("AudioSource for sound effects (dedicated channel)")]
+        public AudioSource sfxSource;
+
         // === AUDIO CLIPS ===
         [Header("Audio Clips")]
         [Tooltip("Heartbeat loop clip - drag your audio file here in Inspector")]
         public AudioClip heartbeatClip;
 
-        // Future: footstep clips, ambient clips, music clips
+        [Header("SFX Clips")]
+        [Tooltip("Button click success sound")]
+        public AudioClip buttonClickClip;
+
+        [Tooltip("Button miss/timeout sound")]
+        public AudioClip buttonMissClip;
+
+        [Tooltip("Breath inhale sound")]
+        public AudioClip breathInhaleClip;
+
+        [Tooltip("Breath exhale sound")]
+        public AudioClip breathExhaleClip;
+
+        [Tooltip("Irregular breath warning")]
+        public AudioClip breathWarningClip;
+
+        [Tooltip("HR milestone reached")]
+        public AudioClip hrMilestoneClip;
+
+        [Tooltip("Ambient music")]
+        public AudioClip musicClip;
+
 
         // === UNITY LIFECYCLE ===
 
@@ -53,17 +77,45 @@ namespace BrainNotBraining.Core
 
         /// <summary>
         /// Creates AudioSource components if they don't exist (programmatically).
+        /// Note: If clips aren't assigned in Inspector, you must manually assign them.
+        /// Resources.Load is disabled - use Inspector assignment instead.
         /// </summary>
         private void InitializeAudioSources()
         {
-            // Try to load heartbeat clip from Resources if not assigned
+            // Log which clips are missing (must be assigned in Inspector)
             if (heartbeatClip == null)
             {
-                heartbeatClip = Resources.Load<AudioClip>("Audio/heart-beat");
-                if (heartbeatClip == null)
-                {
-                    Debug.LogWarning("AudioManager: Could not load heartbeat clip. Please assign it in Inspector or place it in Resources/Audio/heart-beat");
-                }
+                Debug.LogWarning("AudioManager: Heartbeat clip not assigned! Drag from Assets/Audio/ to AudioManager in Inspector");
+            }
+
+            if (buttonClickClip == null)
+            {
+                Debug.LogWarning("AudioManager: button_click not assigned! Drag from Assets/Audio/SFX/ to AudioManager");
+            }
+
+            if (buttonMissClip == null)
+            {
+                Debug.LogWarning("AudioManager: button_miss not assigned! Drag from Assets/Audio/SFX/ to AudioManager");
+            }
+
+            if (breathInhaleClip == null)
+            {
+                Debug.LogWarning("AudioManager: breath_inhale not assigned! Drag from Assets/Audio/SFX/ to AudioManager");
+            }
+
+            if (breathExhaleClip == null)
+            {
+                Debug.LogWarning("AudioManager: breath_exhale not assigned! Drag from Assets/Audio/SFX/ to AudioManager");
+            }
+
+            if (breathWarningClip == null)
+            {
+                Debug.LogWarning("AudioManager: breath_warning not assigned! Drag from Assets/Audio/SFX/ to AudioManager");
+            }
+
+            if (hrMilestoneClip == null)
+            {
+                Debug.LogWarning("AudioManager: hr_milestone not assigned! Drag from Assets/Audio/SFX/ to AudioManager");
             }
 
             if (heartbeatSource == null)
@@ -101,6 +153,15 @@ namespace BrainNotBraining.Core
             musicSource.loop = false;
             musicSource.playOnAwake = false;
             musicSource.volume = 0.0f;
+
+            if (sfxSource == null)
+            {
+                sfxSource = gameObject.AddComponent<AudioSource>();
+            }
+            sfxSource.clip = null;
+            sfxSource.loop = false;
+            sfxSource.playOnAwake = false;
+            sfxSource.volume = 1.0f;
 
             Debug.Log("AudioManager initialized");
         }
@@ -144,9 +205,59 @@ namespace BrainNotBraining.Core
         /// </summary>
         public void PlaySFX(AudioClip clip, float volume = 1.0f)
         {
-            if (clip != null)
+            if (clip != null && sfxSource != null)
             {
-                heartbeatSource.PlayOneShot(clip, volume);
+                sfxSource.PlayOneShot(clip, volume);
+            }
+        }
+
+        // === PUZZLE 0 SFX HELPERS ===
+
+        public void PlayButtonClick()
+        {
+            if (buttonClickClip != null)
+            {
+                PlaySFX(buttonClickClip, 0.8f);
+            }
+        }
+
+        public void PlayButtonMiss()
+        {
+            if (buttonMissClip != null)
+            {
+                PlaySFX(buttonMissClip, 0.7f);
+            }
+        }
+
+        public void PlayBreathInhale()
+        {
+            if (breathInhaleClip != null)
+            {
+                PlaySFX(breathInhaleClip, 0.5f);
+            }
+        }
+
+        public void PlayBreathExhale()
+        {
+            if (breathExhaleClip != null)
+            {
+                PlaySFX(breathExhaleClip, 0.5f);
+            }
+        }
+
+        public void PlayBreathWarning()
+        {
+            if (breathWarningClip != null)
+            {
+                PlaySFX(breathWarningClip, 0.9f);
+            }
+        }
+
+        public void PlayHRMilestone()
+        {
+            if (hrMilestoneClip != null)
+            {
+                PlaySFX(hrMilestoneClip, 0.8f);
             }
         }
 
@@ -163,10 +274,22 @@ namespace BrainNotBraining.Core
         {
             // TODO (Level 2): Start playing ambient sounds
         }
-
+        
         public void EnableMusic()
         {
-            // TODO (Level 3+): Start playing background music
+            // Music must be assigned to musicSource.clip in Inspector
+            // Or assign via ReflexBreathPuzzle's musicSource field
+            if (musicSource != null && musicSource.clip != null)
+            {
+                musicSource.loop = true;
+                musicSource.volume = 0.3f; // Start quiet
+                musicSource.Play();
+                Debug.Log("Music started: " + musicSource.clip.name);
+            }
+            else
+            {
+                Debug.LogWarning("Music not assigned! Drag audio file to AudioManager's musicSource or assign in ReflexBreathPuzzle");
+            }
         }
     }
 }
