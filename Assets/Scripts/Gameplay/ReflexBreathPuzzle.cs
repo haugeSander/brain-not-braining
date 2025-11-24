@@ -8,10 +8,11 @@ using BrainNotBraining.Core;
 public class ReflexBreathPuzzle : PuzzleBase
 {
     [Header("Heart Rate Settings")]
-    private int currentHR = 0; // Runtime value - NOT serialized to prevent Inspector interference
+    private int currentHR = 0; // Runtime value - start at 0 (mouse coming to life)
     [SerializeField] private int targetHR = 500;
     [SerializeField] private int failThresholdHR = 0;
     [SerializeField] private float hrDecayRate = 1f; // HR lost per second
+    private bool heartHasBeenAwakened = false; // Track if HR has ever been > 0
 
     [Header("Spawn Settings")]
     [SerializeField] private GameObject buttonPrefab;
@@ -137,7 +138,7 @@ public class ReflexBreathPuzzle : PuzzleBase
             {
                 musicSource.clip = musicClip;
                 musicSource.loop = true;
-                musicSource.volume = 0.3f;
+                musicSource.volume = 0.03f; // Start very low, will increase with HR
                 musicSource.Play();
                 Debug.Log($"Music started directly: {musicClip.name}, Playing: {musicSource.isPlaying}");
             }
@@ -197,6 +198,13 @@ public class ReflexBreathPuzzle : PuzzleBase
             heartbeatSource.pitch = Mathf.Lerp(minPitch, maxPitch, pitchPercent);
         }
 
+        // Update music volume based on HR (increase from 0.03 to 0.6)
+        if (musicSource != null && musicSource.isPlaying)
+        {
+            float volumePercent = Mathf.Clamp01(currentHR / (float)targetHR);
+            musicSource.volume = Mathf.Lerp(0.03f, 0.6f, volumePercent);
+        }
+
         // Check win/loss conditions
         CheckWinCondition();
         CheckLossCondition();
@@ -238,6 +246,13 @@ public class ReflexBreathPuzzle : PuzzleBase
 
         // Debug: Log HR changes
         Debug.Log($"HR Change: {previousHR} + ({amount}) = {currentHR}");
+
+        // Track if heart has been awakened (HR went above 0)
+        if (currentHR > 0 && !heartHasBeenAwakened)
+        {
+            heartHasBeenAwakened = true;
+            Debug.Log("Heart awakened! HR is now above 0.");
+        }
 
         // Check for HR milestones (every 100 HR)
         int currentMilestone = currentHR / 100;
@@ -290,9 +305,16 @@ public class ReflexBreathPuzzle : PuzzleBase
             lastBreathActionTime = Time.time;
 
             // Clear idle warning if it was showing
-            if (isShowingIdleWarning && breathMeter != null)
+            if (isShowingIdleWarning)
             {
-                breathMeter.SetIdleWarning(false);
+                if (breathMeter != null)
+                {
+                    breathMeter.SetIdleWarning(false);
+                }
+                if (screenFlash != null)
+                {
+                    screenFlash.StopFadeToBlack(); // Gradually clear the blackness
+                }
                 isShowingIdleWarning = false;
             }
         }
@@ -444,15 +466,15 @@ public class ReflexBreathPuzzle : PuzzleBase
                 isShowingIdleWarning = true;
                 Debug.Log($"Player idle for {timeSinceLastBreath:F1}s - showing breath warning!");
 
-                // PANIC EFFECTS!
+                // Start fading to black
                 if (screenFlash != null)
                 {
-                    screenFlash.FlashRed(); // Red screen flash
+                    screenFlash.StartFadeToBlack();
                 }
 
                 if (cameraShake != null)
                 {
-                    cameraShake.ShakeMedium(); // Shake camera
+                    cameraShake.ShakeMedium(); // Shake camera once at start
                 }
 
                 if (AudioManager.Instance != null)
@@ -461,23 +483,7 @@ public class ReflexBreathPuzzle : PuzzleBase
                 }
             }
         }
-        // Continue showing panic effects while idle
-        else if (timeSinceLastBreath >= idleBreathWarningTime && isShowingIdleWarning)
-        {
-            // Flash and shake every 1.5 seconds while still idle
-            if (Mathf.FloorToInt(timeSinceLastBreath) % 2 == 0 && Time.frameCount % 90 == 0)
-            {
-                if (screenFlash != null)
-                {
-                    screenFlash.FlashBlack(); // Escalate to black flash
-                }
-
-                if (cameraShake != null)
-                {
-                    cameraShake.ShakeMedium();
-                }
-            }
-        }
+        // Screen continues to fade darker while player is idle (handled by ScreenFlash.Update)
     }
 
     private void CheckWinCondition()
@@ -490,11 +496,25 @@ public class ReflexBreathPuzzle : PuzzleBase
 
     private void CheckLossCondition()
     {
-        if (currentHR <= failThresholdHR || consecutiveIrregularBreaths >= irregularBreathThreshold)
+        // Only check blackout if game has actually started
+        bool isBlackedOut = gameStarted && screenFlash != null && screenFlash.IsFullyBlack();
+
+        // Only fail from HR if it drops back to 0 AFTER being awakened
+        bool heartFailed = heartHasBeenAwakened && currentHR <= failThresholdHR;
+
+        if (heartFailed || consecutiveIrregularBreaths >= irregularBreathThreshold || isBlackedOut)
         {
             // Handle loss (restart puzzle or show fail screen)
-            Debug.Log("Puzzle failed! HR: " + currentHR + ", Irregular breaths: " + consecutiveIrregularBreaths);
-            // Could call GameManager to restart level
+            string reason = isBlackedOut ? "Full blackout (stopped breathing)" :
+                            heartFailed ? "Heart stopped (HR dropped back to 0)" :
+                            "Too many irregular breaths";
+            Debug.Log($"Puzzle failed! Reason: {reason}, HR: {currentHR}, Irregular breaths: {consecutiveIrregularBreaths}");
+
+            // Stop the game
+            gameStarted = false;
+
+            // TODO: Could call GameManager to restart level or show game over screen
+            // For now, just log the failure
         }
     }
 

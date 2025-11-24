@@ -217,7 +217,7 @@ namespace BrainNotBraining.Core
         {
             if (buttonClickClip != null)
             {
-                PlaySFX(buttonClickClip, 0.8f);
+                PlaySFX(buttonClickClip, 0.3f);
             }
         }
 
@@ -225,7 +225,7 @@ namespace BrainNotBraining.Core
         {
             if (buttonMissClip != null)
             {
-                PlaySFX(buttonMissClip, 0.7f);
+                PlaySFX(buttonMissClip, 0.3f);
             }
         }
 
@@ -233,7 +233,7 @@ namespace BrainNotBraining.Core
         {
             if (breathInhaleClip != null)
             {
-                PlaySFX(breathInhaleClip, 0.5f);
+                PlaySFX(breathInhaleClip, 0.2f);
             }
         }
 
@@ -241,7 +241,7 @@ namespace BrainNotBraining.Core
         {
             if (breathExhaleClip != null)
             {
-                PlaySFX(breathExhaleClip, 0.5f);
+                PlaySFX(breathExhaleClip, 0.2f);
             }
         }
 
@@ -249,7 +249,7 @@ namespace BrainNotBraining.Core
         {
             if (breathWarningClip != null)
             {
-                PlaySFX(breathWarningClip, 0.9f);
+                PlaySFX(breathWarningClip, 0.4f);
             }
         }
 
@@ -257,7 +257,7 @@ namespace BrainNotBraining.Core
         {
             if (hrMilestoneClip != null)
             {
-                PlaySFX(hrMilestoneClip, 0.8f);
+                PlaySFX(hrMilestoneClip, 0.3f);
             }
         }
 

@@ -172,11 +172,11 @@ public class ClickableReflexButton : MonoBehaviour, IPointerClickHandler
 
     private IEnumerator ExplosionEffect(Color color)
     {
-        // Create reliable UI-based explosion
-        Transform canvasTransform = GetComponentInParent<Canvas>().transform;
-        UIExplosion.Create(rectTransform.anchoredPosition, color, canvasTransform);
+        // UI explosions disabled - particle systems preferred
+        // Transform canvasTransform = GetComponentInParent<Canvas>().transform;
+        // UIExplosion.Create(rectTransform.anchoredPosition, color, canvasTransform);
 
-        Debug.Log($"UI Explosion created at position: {rectTransform.anchoredPosition}, Color: {color}");
+        // Debug.Log($"UI Explosion created at position: {rectTransform.anchoredPosition}, Color: {color}");
 
         // Also trigger particle system if available (as bonus effect)
         if (explosionEffect != null)
@@ -201,7 +201,7 @@ public class ClickableReflexButton : MonoBehaviour, IPointerClickHandler
             }
 
             // Reparent to Canvas, preserving world position
-            explosionEffect.transform.SetParent(canvasTransform, worldPositionStays: true);
+            //explosionEffect.transform.SetParent(canvasTransform, worldPositionStays: true);
 
             // Adjust Z to be in front of camera (for visibility)
             Vector3 explosionPos = explosionEffect.transform.position;
