@@ -125,7 +125,7 @@ namespace BrainNotBraining.Core
             heartbeatSource.clip = heartbeatClip;
             heartbeatSource.loop = true;
             heartbeatSource.playOnAwake = false;
-            heartbeatSource.volume = 0.7f;
+            heartbeatSource.volume = 0.4f; // Lowered from 0.7f
 
             if (footstepsSource == null)
             {
@@ -163,6 +163,7 @@ namespace BrainNotBraining.Core
             sfxSource.playOnAwake = false;
             sfxSource.volume = 1.0f;
 
+            audioSourcesInitialized = true;
             Debug.Log("AudioManager initialized");
         }
 
@@ -290,6 +291,257 @@ namespace BrainNotBraining.Core
             {
                 Debug.LogWarning("Music not assigned! Drag audio file to AudioManager's musicSource or assign in ReflexBreathPuzzle");
             }
+        }
+
+        // === AUDIO FADE SYSTEM (FOR WIN/LOSE CONDITIONS) ===
+
+        private AudioLowPassFilter musicLowPass;
+        private AudioLowPassFilter heartbeatLowPass;
+        private bool isMuffling = false;
+        private float muffleProgress = 0f;
+        private bool audioSourcesInitialized = false;
+
+        /// <summary>
+        /// Start muffling audio (apply lowpass filter gradually).
+        /// Used for low HR warning and idle breathing warning.
+        /// </summary>
+        public void StartMuffling(float duration = 2f)
+        {
+            if (isMuffling) return; // Already muffling
+
+            // Ensure audio sources are initialized first
+            if (!audioSourcesInitialized)
+            {
+                Debug.LogWarning("AudioManager: Audio sources not initialized yet, cannot start muffling");
+                return;
+            }
+
+            // Add lowpass filters if they don't exist
+            if (musicSource != null && musicSource.gameObject != null && musicLowPass == null)
+            {
+                try
+                {
+                    musicLowPass = musicSource.gameObject.AddComponent<AudioLowPassFilter>();
+                    musicLowPass.cutoffFrequency = 22000f; // Start at max (no filtering)
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogWarning($"AudioManager: Could not add lowpass to music source: {e.Message}");
+                }
+            }
+
+            if (heartbeatSource != null && heartbeatSource.gameObject != null && heartbeatLowPass == null)
+            {
+                try
+                {
+                    heartbeatLowPass = heartbeatSource.gameObject.AddComponent<AudioLowPassFilter>();
+                    heartbeatLowPass.cutoffFrequency = 22000f; // Start at max (no filtering)
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogWarning($"AudioManager: Could not add lowpass to heartbeat source: {e.Message}");
+                }
+            }
+
+            // Only start muffling if we have at least one filter
+            if (musicLowPass != null || heartbeatLowPass != null)
+            {
+                isMuffling = true;
+                muffleProgress = 0f;
+                StartCoroutine(MuffleAudioCoroutine(duration));
+                Debug.Log("AudioManager: Starting audio muffling");
+            }
+            else
+            {
+                Debug.LogWarning("AudioManager: No audio sources available for muffling");
+            }
+        }
+
+        /// <summary>
+        /// Stop muffling and restore clear audio.
+        /// Called when player recovers from danger state.
+        /// </summary>
+        public void StopMuffling(float duration = 1f)
+        {
+            if (!isMuffling && musicLowPass == null && heartbeatLowPass == null) return;
+
+            isMuffling = false;
+
+            // Only start unmuffling if we have filters to remove
+            if (musicLowPass != null || heartbeatLowPass != null)
+            {
+                StartCoroutine(UnmuffleAudioCoroutine(duration));
+                Debug.Log("AudioManager: Stopping audio muffling");
+            }
+        }
+
+        private System.Collections.IEnumerator MuffleAudioCoroutine(float duration)
+        {
+            float elapsed = 0f;
+
+            while (elapsed < duration && isMuffling)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                muffleProgress = Mathf.Clamp01(elapsed / duration);
+
+                // Gradually reduce cutoff frequency (22000 Hz → 500 Hz)
+                float targetCutoff = Mathf.Lerp(22000f, 500f, muffleProgress);
+
+                if (musicLowPass != null)
+                    musicLowPass.cutoffFrequency = targetCutoff;
+
+                if (heartbeatLowPass != null)
+                    heartbeatLowPass.cutoffFrequency = targetCutoff;
+
+                yield return null;
+            }
+
+            Debug.Log("AudioManager: Muffling complete");
+        }
+
+        private System.Collections.IEnumerator UnmuffleAudioCoroutine(float duration)
+        {
+            float elapsed = 0f;
+            float startCutoff = musicLowPass != null ? musicLowPass.cutoffFrequency : 500f;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float t = elapsed / duration;
+
+                // Gradually restore cutoff frequency (current → 22000 Hz)
+                float targetCutoff = Mathf.Lerp(startCutoff, 22000f, t);
+
+                if (musicLowPass != null)
+                    musicLowPass.cutoffFrequency = targetCutoff;
+
+                if (heartbeatLowPass != null)
+                    heartbeatLowPass.cutoffFrequency = targetCutoff;
+
+                yield return null;
+            }
+
+            // Remove lowpass filters when done
+            if (musicLowPass != null)
+            {
+                Destroy(musicLowPass);
+                musicLowPass = null;
+            }
+
+            if (heartbeatLowPass != null)
+            {
+                Destroy(heartbeatLowPass);
+                heartbeatLowPass = null;
+            }
+
+            muffleProgress = 0f;
+            Debug.Log("AudioManager: Unmuffling complete");
+        }
+
+        /// <summary>
+        /// Gradually fade out all audio sources except heartbeat over specified duration.
+        /// Used for lose condition atmospheric effect.
+        /// </summary>
+        public void FadeOutAllExceptHeartbeat(float duration)
+        {
+            StartCoroutine(FadeOutAllExceptHeartbeatCoroutine(duration));
+        }
+
+        private System.Collections.IEnumerator FadeOutAllExceptHeartbeatCoroutine(float duration)
+        {
+            float elapsed = 0f;
+            float startMusicVolume = musicSource != null ? musicSource.volume : 0f;
+            float startFootstepsVolume = footstepsSource != null ? footstepsSource.volume : 0f;
+            float startAmbientVolume = ambientSource != null ? ambientSource.volume : 0f;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.unscaledDeltaTime; // Use unscaled time in case game is paused
+                float t = elapsed / duration;
+
+                // Fade out music, footsteps, ambient (but NOT heartbeat or SFX)
+                if (musicSource != null)
+                    musicSource.volume = Mathf.Lerp(startMusicVolume, 0f, t);
+
+                if (footstepsSource != null)
+                    footstepsSource.volume = Mathf.Lerp(startFootstepsVolume, 0f, t);
+
+                if (ambientSource != null)
+                    ambientSource.volume = Mathf.Lerp(startAmbientVolume, 0f, t);
+
+                yield return null;
+            }
+
+            // Ensure fully muted
+            if (musicSource != null) musicSource.volume = 0f;
+            if (footstepsSource != null) footstepsSource.volume = 0f;
+            if (ambientSource != null) ambientSource.volume = 0f;
+
+            Debug.Log("AudioManager: All audio faded out except heartbeat");
+        }
+
+        /// <summary>
+        /// Add echo effect to heartbeat and slowly fade it out.
+        /// Creates atmospheric "consciousness fading" effect.
+        /// </summary>
+        public void EchoHeartbeat()
+        {
+            StartCoroutine(EchoHeartbeatCoroutine());
+        }
+
+        private System.Collections.IEnumerator EchoHeartbeatCoroutine()
+        {
+            if (heartbeatSource == null) yield break;
+
+            float startVolume = heartbeatSource.volume;
+            float startPitch = heartbeatSource.pitch;
+            float duration = 3f;
+            float elapsed = 0f;
+
+            // Gradually slow down and fade out heartbeat
+            while (elapsed < duration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float t = elapsed / duration;
+
+                // Slow down pitch (simulating dying heartbeat)
+                heartbeatSource.pitch = Mathf.Lerp(startPitch, startPitch * 0.5f, t);
+
+                // Fade out volume
+                heartbeatSource.volume = Mathf.Lerp(startVolume, 0f, t);
+
+                yield return null;
+            }
+
+            heartbeatSource.volume = 0f;
+            Debug.Log("AudioManager: Heartbeat echo complete");
+        }
+
+        /// <summary>
+        /// Restore all audio to normal volumes (for retry/restart).
+        /// </summary>
+        public void RestoreAudio()
+        {
+            // Restore default volumes
+            if (heartbeatSource != null)
+            {
+                heartbeatSource.volume = 0.4f; // Lowered from 0.7f
+                heartbeatSource.pitch = 0.8f; // Reset to starting pitch (raised from 0.4)
+            }
+
+            if (musicSource != null && musicSource.isPlaying)
+            {
+                musicSource.volume = 0.3f; // Or whatever default you want
+                musicSource.pitch = 1.0f; // Ensure music is never pitched
+            }
+
+            if (footstepsSource != null)
+                footstepsSource.volume = 0.0f; // Default off
+
+            if (ambientSource != null)
+                ambientSource.volume = 0.0f; // Default off
+
+            Debug.Log("AudioManager: Audio restored to default volumes");
         }
     }
 }

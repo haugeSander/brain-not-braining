@@ -19,6 +19,7 @@ public class BreathMeter : MonoBehaviour
     [Header("Warning Settings")]
     [SerializeField] private float blinkSpeed = 5f;
     [SerializeField] private Color overfilledColor = Color.yellow;
+    [SerializeField] private TextMeshProUGUI irregularBreathCounter; // Shows "2/3" when irregular
 
     private bool isWarning = false;
     private bool isOverfilled = false;
@@ -31,10 +32,14 @@ public class BreathMeter : MonoBehaviour
         if (validZoneTop != null)
         {
             validZoneTop.color = validZoneColor;
+            // Ensure valid zone appears on top of fillbar by adjusting hierarchy
+            validZoneTop.transform.SetAsLastSibling();
         }
         if (validZoneBottom != null)
         {
             validZoneBottom.color = validZoneColor;
+            // Ensure valid zone appears on top of fillbar by adjusting hierarchy
+            validZoneBottom.transform.SetAsLastSibling();
         }
     }
 
@@ -127,7 +132,7 @@ public class BreathMeter : MonoBehaviour
             // Show URGENT text warning
             if (statusText != null)
             {
-                statusText.text = "!!! BREATHE !!!";
+                statusText.text = "!BREATHE!";
                 statusText.color = Color.red;
             }
             blinkTimer = 0f;
@@ -179,6 +184,49 @@ public class BreathMeter : MonoBehaviour
             rt.anchorMax = new Vector2(1, 0.5f);
             rt.anchoredPosition = new Vector2(0, yPosition);
             rt.sizeDelta = new Vector2(0, 3); // 3 pixel line
+        }
+    }
+
+    /// <summary>
+    /// Updates the irregular breath counter display
+    /// </summary>
+    /// <param name="current">Current irregular breath count</param>
+    /// <param name="max">Maximum before failure (usually 3)</param>
+    public void UpdateIrregularBreathCount(int current, int max)
+    {
+        if (irregularBreathCounter == null)
+        {
+            Debug.LogWarning("BreathMeter: irregularBreathCounter not assigned! Drag the 'Irregular Counter Text' UI element to the BreathMeter Inspector.");
+            return;
+        }
+
+        if (current <= 0)
+        {
+            // Hide counter when no irregular breaths
+            irregularBreathCounter.text = "";
+            irregularBreathCounter.gameObject.SetActive(false);
+        }
+        else
+        {
+            // Show counter with danger escalation
+            irregularBreathCounter.gameObject.SetActive(true);
+            irregularBreathCounter.text = $"{current}/{max}";
+
+            // Color intensifies as you approach limit
+            if (current == 1)
+            {
+                irregularBreathCounter.color = new Color(1f, 0.7f, 0f); // Orange warning
+            }
+            else if (current == 2)
+            {
+                irregularBreathCounter.color = new Color(1f, 0.3f, 0f); // Red-orange danger
+            }
+            else if (current >= max - 1)
+            {
+                irregularBreathCounter.color = Color.red; // Critical red
+            }
+
+            Debug.Log($"BreathMeter: Irregular breath count updated to {current}/{max}");
         }
     }
 }

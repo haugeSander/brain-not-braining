@@ -21,6 +21,18 @@ public class ScreenFlash : MonoBehaviour
     private float clearSpeed = 1.5f; // Speed multiplier for clearing
     private float idleTime = 0f; // Track how long we've been fading
 
+    // Void fade state (for lose condition)
+    private bool isFadingToVoid = false;
+    private float voidFadeProgress = 0f;
+    private float voidFadeDuration = 3f; // Slow, atmospheric fade
+    private System.Action onVoidFadeComplete;
+
+    // White fade state (for win condition)
+    private bool isFadingToWhite = false;
+    private float whiteFadeProgress = 0f;
+    private float whiteFadeDuration = 2f;
+    private System.Action onWhiteFadeComplete;
+
     private void Start()
     {
         if (flashImage != null)
@@ -35,6 +47,46 @@ public class ScreenFlash : MonoBehaviour
     private void Update()
     {
         if (flashImage == null) return;
+
+        // Handle void fade (lose condition - slowest priority)
+        if (isFadingToVoid)
+        {
+            voidFadeProgress += Time.unscaledDeltaTime / voidFadeDuration;
+            voidFadeProgress = Mathf.Clamp01(voidFadeProgress);
+
+            Color c = Color.black;
+            c.a = voidFadeProgress;
+            flashImage.color = c;
+
+            // Complete callback
+            if (voidFadeProgress >= 1f)
+            {
+                isFadingToVoid = false;
+                onVoidFadeComplete?.Invoke();
+                onVoidFadeComplete = null;
+            }
+            return; // Don't process other fades
+        }
+
+        // Handle white fade (win condition)
+        if (isFadingToWhite)
+        {
+            whiteFadeProgress += Time.unscaledDeltaTime / whiteFadeDuration;
+            whiteFadeProgress = Mathf.Clamp01(whiteFadeProgress);
+
+            Color c = Color.white;
+            c.a = whiteFadeProgress;
+            flashImage.color = c;
+
+            // Complete callback
+            if (whiteFadeProgress >= 1f)
+            {
+                isFadingToWhite = false;
+                onWhiteFadeComplete?.Invoke();
+                onWhiteFadeComplete = null;
+            }
+            return; // Don't process other fades
+        }
 
         // Handle quick flash effects
         if (isFlashing)
@@ -162,5 +214,70 @@ public class ScreenFlash : MonoBehaviour
     public bool IsFullyBlack()
     {
         return fadeProgress >= 0.99f; // Treat 99%+ as fully black
+    }
+
+    /// <summary>
+    /// Slowly fade to complete black (void/lose condition).
+    /// Uses unscaled time to work even when game is paused.
+    /// </summary>
+    /// <param name="duration">Duration in seconds (default 3s)</param>
+    /// <param name="onComplete">Callback when fade completes</param>
+    public void FadeToVoid(float duration = 3f, System.Action onComplete = null)
+    {
+        // Cancel any other fades
+        isFlashing = false;
+        isFading = false;
+        isFadingToWhite = false;
+
+        voidFadeDuration = duration;
+        voidFadeProgress = 0f;
+        isFadingToVoid = true;
+        onVoidFadeComplete = onComplete;
+
+        Debug.Log($"ScreenFlash: Starting void fade over {duration}s");
+    }
+
+    /// <summary>
+    /// Fade to complete white (win condition).
+    /// Uses unscaled time to work even when game is paused.
+    /// </summary>
+    /// <param name="duration">Duration in seconds (default 2s)</param>
+    /// <param name="onComplete">Callback when fade completes</param>
+    public void FadeToWhite(float duration = 2f, System.Action onComplete = null)
+    {
+        // Cancel any other fades
+        isFlashing = false;
+        isFading = false;
+        isFadingToVoid = false;
+
+        whiteFadeDuration = duration;
+        whiteFadeProgress = 0f;
+        isFadingToWhite = true;
+        onWhiteFadeComplete = onComplete;
+
+        Debug.Log($"ScreenFlash: Starting white fade over {duration}s");
+    }
+
+    /// <summary>
+    /// Clear the screen back to transparent (useful for transitions)
+    /// </summary>
+    public void ClearScreen()
+    {
+        if (flashImage != null)
+        {
+            Color c = flashImage.color;
+            c.a = 0f;
+            flashImage.color = c;
+        }
+
+        // Reset all fade states
+        isFlashing = false;
+        isFading = false;
+        isFadingToVoid = false;
+        isFadingToWhite = false;
+        fadeProgress = 0f;
+        voidFadeProgress = 0f;
+        whiteFadeProgress = 0f;
+        idleTime = 0f;
     }
 }
