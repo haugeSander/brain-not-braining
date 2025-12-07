@@ -100,7 +100,9 @@ InitTestScene*.unity*
 
 # Planning files
 CLAUDE.md
-UNITY_IMPLEMENTATION_PLAN.md
-LEVEL_0_IMPLEMENTATION_GUIDE.md
-PUZZLE_0_IMPLEMENTATION_GUIDE.md
-BRAIN_VISUALIZATION_SETUP.md
+
+# Plastic SCM (Unity Version Control) - not needed in Git
+.plastic/
+plastic.selector
+plastic.workspace
+plastic.workspaces

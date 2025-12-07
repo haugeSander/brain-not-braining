@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.InputSystem;
 
+
 public class MenuManager : MonoBehaviour
 {
 
@@ -29,13 +30,10 @@ public class MenuManager : MonoBehaviour
         SceneManager.LoadScene("IntroCutscene");
 	}
 
-	public void OnClickScores(){
-        Debug.Log("You have clicked the scores button!");
-	}
 
 	public void OnClickExit(){
 		Application.Quit();
-        UnityEditor.EditorApplication.isPlaying = false;
+        // EditorApplication.isPlaying = false;
 	}
 
 }
