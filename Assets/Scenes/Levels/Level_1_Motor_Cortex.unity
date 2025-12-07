@@ -8793,7 +8793,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CollisionEdgeGlow
   volume: {fileID: 1847570263}
   flashDuration: 1
-  maxIntensity: 0.6
+  maxIntensity: 1
   requiredTag: Obstacle
   floorNormalThreshold: 0.5
 --- !u!4 &682458269 stripped
