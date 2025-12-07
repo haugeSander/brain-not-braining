@@ -13,7 +13,7 @@ public class ClickableReflexButton : MonoBehaviour, IPointerClickHandler
 
     [Header("Visual References")]
     [SerializeField] private Image timerRing;
-    [SerializeField] private ParticleSystem explosionEffect; // Optional
+    [SerializeField] private GameObject explosionEffectPrefab; // Particle system prefab
 
     [Header("Animation")]
     [SerializeField] private float pulseSpeed = 2f;
@@ -137,7 +137,7 @@ public class ClickableReflexButton : MonoBehaviour, IPointerClickHandler
         }
 
         // Destroy self after explosion
-        Destroy(gameObject, 0.3f);
+        DestroyImmediate(gameObject, true);
     }
 
     private void OnTimerExpire()
@@ -165,62 +165,85 @@ public class ClickableReflexButton : MonoBehaviour, IPointerClickHandler
         {
             AudioManager.Instance.PlayButtonMiss();
         }
-
         // Destroy self after explosion
         Destroy(gameObject, 0.3f);
     }
 
     private IEnumerator ExplosionEffect(Color color)
     {
-        // UI explosions disabled - particle systems preferred
-        // Transform canvasTransform = GetComponentInParent<Canvas>().transform;
-        // UIExplosion.Create(rectTransform.anchoredPosition, color, canvasTransform);
-
-        // Debug.Log($"UI Explosion created at position: {rectTransform.anchoredPosition}, Color: {color}");
-
-        // Also trigger particle system if available (as bonus effect)
-        if (explosionEffect != null)
+        // Trigger particle system if prefab is assigned
+        if (explosionEffectPrefab != null)
         {
-            // Get button's WORLD position before any changes
-            Vector3 buttonWorldPosition = rectTransform.position;
-
-            Debug.Log($"Explosion triggered! Color: {color}, Button world position: {buttonWorldPosition}");
-
-            // Configure particle system for 2D Canvas rendering
-            var main = explosionEffect.main;
-            main.startColor = color;
-            main.simulationSpace = ParticleSystemSimulationSpace.World; // Use World space for canvas compatibility
-
-            // Configure renderer to show above canvas UI
-            ParticleSystemRenderer renderer = explosionEffect.GetComponent<ParticleSystemRenderer>();
-            if (renderer != null)
+            // Get the canvas this button belongs to
+            Canvas canvas = GetComponentInParent<Canvas>();
+            if (canvas == null)
             {
-                renderer.sortingLayerName = "Default";
-                renderer.sortingOrder = 1000; // Render above everything
-                renderer.renderMode = ParticleSystemRenderMode.Billboard; // Face camera
+                Debug.LogError("Button is not inside a Canvas! Cannot spawn particles.");
+                yield break;
             }
 
-            // Reparent to Canvas, preserving world position
-            //explosionEffect.transform.SetParent(canvasTransform, worldPositionStays: true);
+            // Get button's screen position (for overlay canvas)
+            Vector3 buttonScreenPosition = rectTransform.position;
 
-            // Adjust Z to be in front of camera (for visibility)
-            Vector3 explosionPos = explosionEffect.transform.position;
-            explosionPos.z = Camera.main != null ? Camera.main.transform.position.z + 5f : 5f;
-            explosionEffect.transform.position = explosionPos;
+            Debug.Log($"Explosion triggered! Color: {color}, Button position: {buttonScreenPosition}, Canvas: {canvas.renderMode}");
 
-            // Ensure particle system is active and play
-            explosionEffect.gameObject.SetActive(true);
-            explosionEffect.Play();
+            // Instantiate the particle system as a child of the canvas
+            GameObject explosionInstance = Instantiate(explosionEffectPrefab, canvas.transform);
+            ParticleSystem particleSystem = explosionInstance.GetComponent<ParticleSystem>();
 
-            Debug.Log($"Particle explosion started at world position: {explosionEffect.transform.position}");
+            if (particleSystem != null)
+            {
+                // Position at button location (canvas space)
+                RectTransform particleRect = explosionInstance.GetComponent<RectTransform>();
+                if (particleRect == null)
+                {
+                    particleRect = explosionInstance.AddComponent<RectTransform>();
+                }
 
-            // Destroy particle system after it's done
-            float totalDuration = main.duration + main.startLifetime.constantMax;
-            Destroy(explosionEffect.gameObject, totalDuration);
+                // Match the button's anchor setup exactly to avoid offset issues
+                particleRect.anchorMin = rectTransform.anchorMin;
+                particleRect.anchorMax = rectTransform.anchorMax;
+                particleRect.pivot = rectTransform.pivot;
+                particleRect.anchoredPosition = rectTransform.anchoredPosition; // Now relative to same anchors!
+                particleRect.sizeDelta = rectTransform.sizeDelta; // Match size for consistency
+                particleRect.localScale = Vector3.one;
+
+                // Configure particle system for UI rendering
+                var main = particleSystem.main;
+                main.startColor = color;
+                main.simulationSpace = ParticleSystemSimulationSpace.Local; // Use Local for UI
+
+                // Override speed to keep particles on screen (adjust these values as needed)
+                main.startSpeed = new ParticleSystem.MinMaxCurve(50f, 150f); // Slower speed for UI scale
+
+                // Configure renderer for UI
+                ParticleSystemRenderer renderer = particleSystem.GetComponent<ParticleSystemRenderer>();
+                if (renderer != null)
+                {
+                    renderer.sortingLayerName = "Default";
+                    renderer.sortingOrder = 1000; // Render above UI
+                    renderer.renderMode = ParticleSystemRenderMode.Billboard;
+                }
+
+                // Play the particle system
+                particleSystem.Play();
+
+                Debug.Log($"Particle explosion at anchoredPos: {particleRect.anchoredPosition}, button anchoredPos: {rectTransform.anchoredPosition}");
+                Debug.Log($"Anchors match: min={particleRect.anchorMin == rectTransform.anchorMin}, max={particleRect.anchorMax == rectTransform.anchorMax}");
+
+                // Destroy the instance after particles finish
+                float totalDuration = main.duration + main.startLifetime.constantMax;
+                Destroy(explosionInstance, totalDuration);
+            }
+            else
+            {
+                Debug.LogWarning("Instantiated explosion prefab doesn't have a ParticleSystem component!");
+                Destroy(explosionInstance);
+            }
         }
         else
         {
-            Debug.LogWarning("ExplosionEffect particle system is null! Assign in Inspector.");
+            Debug.LogWarning("ExplosionEffectPrefab is null! Assign a particle system prefab in Inspector.");
         }
 
         // Simple fade out effect (no scaling/square expansion)

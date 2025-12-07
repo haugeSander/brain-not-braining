@@ -28,7 +28,7 @@ public class ReflexBreathPuzzle : PuzzleBase
     [SerializeField] private float targetExhaleDuration = 3f;
     [SerializeField] private float breathTolerancePercent = 0.3f; // 30% wiggle room
     [SerializeField] private int irregularBreathThreshold = 3; // 3 bad breaths = loss
-    [SerializeField] private float idleBreathWarningTime = 5f; // Show warning after 5 seconds of no breathing
+    [SerializeField] private float idleBreathWarningTime = 3f; // Show warning after 3 seconds at 0% breath
 
     [Header("Audio")]
     [SerializeField] private AudioSource heartbeatSource;
@@ -45,8 +45,17 @@ public class ReflexBreathPuzzle : PuzzleBase
     [SerializeField] private ScreenFlash screenFlash;
     [SerializeField] private CameraShake cameraShake;
     [SerializeField] private BrainNotBraining.UI.GameOverUI gameOverUI;
-    [SerializeField] private WinSequence winSequence;
     [SerializeField] private GameObject mouseTrail; // Mouse trail effect to hide on death
+
+    [Header("Win Sequence Settings")]
+    [SerializeField] private float fadeToWhiteDuration = 3f; // Slow, dramatic fade
+    [SerializeField] private string brainVisualizationScene = "BrainRegionUnlocked";
+
+    [Header("Debug")]
+    [SerializeField] private bool enableDebugBoost = true;
+    [SerializeField] private KeyCode debugBoostKey = KeyCode.D;
+    [SerializeField] private int debugHRBoost = 100;
+    [SerializeField] private int debugBreathCycles = 3;
 
     private float spawnTimer;
     private bool gameStarted = false;
@@ -64,6 +73,8 @@ public class ReflexBreathPuzzle : PuzzleBase
     private bool isLosingSequenceActive = false; // Prevent multiple lose triggers
     private bool isInLowHRDanger = false; // Track if in low HR danger zone (< 10)
     private bool hasCountedOverfillThisCycle = false; // Prevent counting overfill multiple times per breath
+    private bool isIn3xDecay = false; // Track if in 3x decay mode (for HR blink)
+    private float hrBlinkTimer = 0f; // Timer for HR text blink animation
 
     // Breath cycle state tracking
     private enum BreathCycleState { WaitingForInhale, Inhaling, WaitingForExhale, Exhaling }
@@ -178,6 +189,14 @@ public class ReflexBreathPuzzle : PuzzleBase
     {
         if (!gameStarted || isSolved) return;
 
+        // Debug: Boost HR and breath cycles
+        if (enableDebugBoost && Input.GetKeyDown(debugBoostKey))
+        {
+            ModifyHeartRate(debugHRBoost);
+            breathCyclesCompleted = Mathf.Max(breathCyclesCompleted, debugBreathCycles);
+            Debug.Log($"DEBUG: Boosted HR by {debugHRBoost} (now {currentHR}) and set breath cycles to {breathCyclesCompleted}");
+        }
+
         // Handle button spawning
         spawnTimer -= Time.deltaTime;
         if (spawnTimer <= 0 && activeButtons.Count < maxSimultaneousButtons)
@@ -201,16 +220,21 @@ public class ReflexBreathPuzzle : PuzzleBase
                 float timeSinceLastBreath = Time.time - lastBreathActionTime;
                 float decayMultiplier = 1f;
 
-                // After 3 seconds of not breathing, decay accelerates
-                if (timeSinceLastBreath > 3f)
+                // After 2 seconds of not breathing, decay accelerates
+                if (timeSinceLastBreath > 2f)
                 {
                     decayMultiplier = 2f; // Double decay rate
                 }
 
-                // After 5 seconds (when idle warning appears), decay even faster
-                if (timeSinceLastBreath > 5f)
+                // After 3 seconds (when idle warning appears), decay even faster
+                if (timeSinceLastBreath > 3f)
                 {
                     decayMultiplier = 3f; // Triple decay rate
+                    isIn3xDecay = true; // Enable HR blink warning
+                }
+                else
+                {
+                    isIn3xDecay = false; // Clear HR blink warning
                 }
 
                 int decayAmount = Mathf.RoundToInt(hrDecayRate * decayMultiplier);
@@ -315,6 +339,20 @@ public class ReflexBreathPuzzle : PuzzleBase
         if (hrText != null)
         {
             hrText.text = $"HR: {currentHR} / {targetHR}";
+
+            // Blink red when in 3x decay mode
+            if (isIn3xDecay && !isLosingSequenceActive)
+            {
+                hrBlinkTimer += Time.deltaTime * 4f; // Fast blink
+                float alpha = Mathf.PingPong(hrBlinkTimer, 1f);
+                hrText.color = Color.Lerp(Color.white, Color.red, alpha);
+            }
+            else
+            {
+                // Normal white color
+                hrText.color = Color.white;
+                hrBlinkTimer = 0f;
+            }
         }
         else
         {
@@ -382,7 +420,7 @@ public class ReflexBreathPuzzle : PuzzleBase
         {
             lastBreathActionTime = Time.time;
 
-            // Clear idle warning if it was showing
+            // Clear idle warning and decay effects if it was showing
             if (isShowingIdleWarning)
             {
                 if (breathMeter != null)
@@ -399,6 +437,9 @@ public class ReflexBreathPuzzle : PuzzleBase
                 }
                 isShowingIdleWarning = false;
             }
+
+            // Clear 3x decay warning when breathing
+            isIn3xDecay = false;
         }
 
         // STATE MACHINE for full breath cycle validation
@@ -418,33 +459,57 @@ public class ReflexBreathPuzzle : PuzzleBase
                     }
                 }
 
-                // Waiting for player to start inhaling from low position
-                if (breathKeyHeld && !wasBreathing)
+                // Check if player is trying to inhale (even if they were already holding from previous state)
+                if (breathKeyHeld)
                 {
-                    // Check if starting from valid low position
-                    if (currentFillPercent <= 0.20f)
+                    // Only process the start of a new breath if we weren't already inhaling
+                    if (!wasBreathing)
                     {
-                        // Good start - begin inhaling
-                        breathCycleState = BreathCycleState.Inhaling;
-                        reachedTopThreshold = false;
-                        releasedCorrectly = false;
-                        hasCountedOverfillThisCycle = false;
-
-                        if (AudioManager.Instance != null)
+                        // Check if starting from valid low position
+                        if (currentFillPercent <= 0.20f)
                         {
-                            AudioManager.Instance.PlayBreathInhale();
+                            // Good start - begin inhaling
+                            breathCycleState = BreathCycleState.Inhaling;
+                            reachedTopThreshold = false;
+                            releasedCorrectly = false;
+                            hasCountedOverfillThisCycle = false;
+
+                            if (AudioManager.Instance != null)
+                            {
+                                AudioManager.Instance.PlayBreathInhale();
+                            }
+                        }
+                        else
+                        {
+                            // Started too high - irregular breath
+                            MarkBreathIrregular("Started inhaling too late");
+                            breathCycleState = BreathCycleState.Inhaling; // Still allow them to inhale
+                            reachedTopThreshold = false;
+                            releasedCorrectly = false;
+                            hasCountedOverfillThisCycle = true; // Already counted this as irregular
+
+                            // Still play inhale sound
+                            if (AudioManager.Instance != null)
+                            {
+                                AudioManager.Instance.PlayBreathInhale();
+                            }
                         }
                     }
                     else
                     {
-                        // Started too high - irregular breath
-                        MarkBreathIrregular("Started inhaling too late");
-                        breathCycleState = BreathCycleState.Inhaling; // Still track it
+                        // Player is holding space continuously from a previous state
+                        // This happens when they transition from Exhaling while still holding space
+                        // Treat this as starting to inhale in the middle (irregular)
+                        if (currentFillPercent > 0.20f)
+                        {
+                            MarkBreathIrregular("Started inhaling in middle range");
+                        }
+
+                        breathCycleState = BreathCycleState.Inhaling;
                         reachedTopThreshold = false;
                         releasedCorrectly = false;
-                        hasCountedOverfillThisCycle = true; // Already counted this as irregular
+                        hasCountedOverfillThisCycle = true; // Already irregular
 
-                        // Still play inhale sound
                         if (AudioManager.Instance != null)
                         {
                             AudioManager.Instance.PlayBreathInhale();
@@ -716,6 +781,7 @@ public class ReflexBreathPuzzle : PuzzleBase
         }
         isInLowHRDanger = false;
         isShowingIdleWarning = false;
+        isIn3xDecay = false; // Clear HR blink
 
         // Notify GameManager
         if (GameManager.Instance != null)
@@ -822,21 +888,37 @@ public class ReflexBreathPuzzle : PuzzleBase
         }
         activeButtons.Clear();
 
-        // Trigger win sequence (which will handle GameManager.OnLevelComplete)
-        if (winSequence != null)
+        // Start the win sequence coroutine
+        StartCoroutine(WinSequenceCoroutine());
+    }
+
+    /// <summary>
+    /// Handles the win sequence: slow white fade → brain visualization scene
+    /// </summary>
+    private System.Collections.IEnumerator WinSequenceCoroutine()
+    {
+        // Step 1: Slow fade to white (dramatic buildup)
+        if (screenFlash != null)
         {
-            winSequence.StartSequence(BrainRegion.Brainstem);
+            bool fadeComplete = false;
+            screenFlash.FadeToWhite(fadeToWhiteDuration, () => fadeComplete = true);
+
+            // Wait for fade to complete
+            while (!fadeComplete)
+            {
+                yield return null;
+            }
+
+            Debug.Log("ReflexBreathPuzzle: White fade complete, loading brain scene...");
         }
         else
         {
-            Debug.LogWarning("WinSequence not assigned! Falling back to direct GameManager call.");
-
-            // Fallback: direct call to GameManager
-            if (GameManager.Instance != null)
-            {
-                GameManager.Instance.OnLevelComplete();
-            }
+            Debug.LogWarning("ReflexBreathPuzzle: ScreenFlash not assigned!");
+            yield return new WaitForSeconds(fadeToWhiteDuration);
         }
+
+        // Step 2: Load the brain visualization scene
+        UnityEngine.SceneManagement.SceneManager.LoadScene(brainVisualizationScene);
     }
 
     protected override void CheckPuzzleConditions()

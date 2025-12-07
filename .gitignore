@@ -98,8 +98,9 @@ InitTestScene*.unity*
 # Auto-generated scenes by play mode tests
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
 
-# AI and planning files
+# Planning files
 CLAUDE.md
 UNITY_IMPLEMENTATION_PLAN.md
 LEVEL_0_IMPLEMENTATION_GUIDE.md
 PUZZLE_0_IMPLEMENTATION_GUIDE.md
+BRAIN_VISUALIZATION_SETUP.md
