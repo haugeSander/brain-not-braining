@@ -100,3 +100,9 @@ InitTestScene*.unity*
 
 # Planning files
 CLAUDE.md
+
+# Plastic SCM (Unity Version Control) - not needed in Git
+.plastic/
+plastic.selector
+plastic.workspace
+plastic.workspaces
