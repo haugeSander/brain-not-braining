@@ -26,7 +26,7 @@ public class MenuManager : MonoBehaviour
 
 	public void OnClickPlay(){
         Debug.Log("You have clicked the play button!");
-        SceneManager.LoadScene("Level_0_Brainstem");
+        SceneManager.LoadScene("IntroCutscene");
 	}
 
 	public void OnClickScores(){

@@ -1,3 +1,5 @@
 ﻿<Solution>
   <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="com.cqf.urpvolumetricfog.editor.csproj" />
+  <Project Path="com.cqf.urpvolumetricfog.runtime.csproj" />
 </Solution>
