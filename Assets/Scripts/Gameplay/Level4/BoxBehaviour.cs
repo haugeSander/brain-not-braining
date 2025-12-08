@@ -17,8 +17,6 @@ public class BoxBehaviour : MonoBehaviour
 
    void OnCollisionEnter2D(Collision2D collision)
     {
-        Debug.Log("Collision detected");
-         if(collision.gameObject.tag=="Player")
-            SoundManager.instance.PlaySound(HitClip);    
+       
     }
 }

@@ -1,12 +1,16 @@
+using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class EndLeve4 : MonoBehaviour
 {
-    bool inBasket = false;
+    public TextMeshProUGUI text;
+    public AudioClip DoorOpeningClip;
+
     public void Start()
     {
-        
+        text.enabled = false;
     }
 
     public void Update()
@@ -18,23 +22,35 @@ public class EndLeve4 : MonoBehaviour
     {
         if (collision.gameObject.tag == "Player")
         {
-            inBasket= true;
-            StartCoroutine("EndLevel");
+            text.enabled= true;
+            
             // SoundManager.instance.PlaySound(HitClip);   
         } 
     }
 
-      void OnCollisionExit2D(Collision2D other)
+    void OnCollisionStay2D(Collision2D collision)
     {
-        inBasket = false;
-        StopCoroutine("EndLevel");
+            if (collision.gameObject.tag == "Player" && Input.GetKeyDown(KeyCode.F))
+        {
+            
+            StartCoroutine("EndLevel");
+            
+            // SoundManager.instance.PlaySound(HitClip);   
+        }  
     }
 
-     void EndLevel()
+    void OnCollisionExit2D(Collision2D other)
+    {
+        text.enabled = false;
+      
+    }
+
+     IEnumerator EndLevel()
     {
         Debug.Log("Level Complete!");
-        // yield WaitForSeconds(3);
-        if (inBasket)
-            SceneManager.LoadScene("LevelFinished");
+        SoundManager.instance.PlaySound(DoorOpeningClip);
+        yield return new WaitForSeconds(4);
+        
+        SceneManager.LoadScene("LevelFinished");
     }
 }

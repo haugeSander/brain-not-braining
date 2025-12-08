@@ -15,7 +15,7 @@ public class InteractableBoxBehaviour : MonoBehaviour
 
     private void Update()
     {
-
+        
     }
 
     void OnCollisionEnter2D(Collision2D collision)
@@ -24,7 +24,7 @@ public class InteractableBoxBehaviour : MonoBehaviour
         if (collision.gameObject.tag == "Player")
         {
             text.enabled=true;
-            SoundManager.instance.PlaySound(HitClip);
+            // SoundManager.instance.PlaySound(HitClip);
         
         }
     }
