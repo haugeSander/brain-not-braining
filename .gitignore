@@ -106,3 +106,6 @@ CLAUDE.md
 plastic.selector
 plastic.workspace
 plastic.workspaces
+
+# Unity auto-recovery files
+/[Aa]ssets/_Recovery/
