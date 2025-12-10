@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.InputSystem;
 
+
 public class MenuManager : MonoBehaviour
 {
 
@@ -26,16 +27,13 @@ public class MenuManager : MonoBehaviour
 
 	public void OnClickPlay(){
         Debug.Log("You have clicked the play button!");
-        SceneManager.LoadScene("Level_0_Brainstem");
+        SceneManager.LoadScene("IntroCutscene");
 	}
 
-	public void OnClickScores(){
-        Debug.Log("You have clicked the scores button!");
-	}
 
 	public void OnClickExit(){
 		Application.Quit();
-        UnityEditor.EditorApplication.isPlaying = false;
+        // EditorApplication.isPlaying = false;
 	}
 
 }
