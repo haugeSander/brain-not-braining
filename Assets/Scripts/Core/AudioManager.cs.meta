@@ -1,2 +1,24 @@
 fileFormatVersion: 2
 guid: 7c7e6d07b281442a88f6faafa13e6c56
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - heartbeatSource: {instanceID: 0}
+  - footstepsSource: {instanceID: 0}
+  - ambientSource: {instanceID: 0}
+  - musicSource: {instanceID: 0}
+  - sfxSource: {instanceID: 0}
+  - heartbeatClip: {fileID: 8300000, guid: 449846349cefb49e291a7e843efad6a6, type: 3}
+  - buttonClickClip: {fileID: 8300000, guid: 1f7b46aecb4524309bf789e35cefb6e5, type: 3}
+  - buttonMissClip: {fileID: 8300000, guid: f18a0efd8d3f640d0960b14c5459415b, type: 3}
+  - breathInhaleClip: {fileID: 8300000, guid: b8e86a98e58d44fa890f2e7e41fa9d8a, type: 3}
+  - breathExhaleClip: {fileID: 8300000, guid: b21acc61e0f294fbb9fca3c1a06c9a18, type: 3}
+  - breathWarningClip: {fileID: 8300000, guid: efea705887acd4c68bbe5249e7dec260, type: 3}
+  - hrMilestoneClip: {fileID: 8300000, guid: fd8694f5651b64355bbe1aeec02c3d85, type: 3}
+  - musicClip: {fileID: 8300000, guid: f64f8c29608be47209854bb729555836, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
