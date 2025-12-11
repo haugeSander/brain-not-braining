@@ -1,7 +1,7 @@
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class BackgroundBehaviour : MonoBehaviour
+public class BackgroundLevelSevenBehaviour : MonoBehaviour
 {
     public GameObject MainArea;
     private void Start()

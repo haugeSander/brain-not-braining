@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class BoxBehaviour : MonoBehaviour
+public class Box2DBehaviour : MonoBehaviour
 {
     public AudioClip HitClip;
     public AudioClip UsingClip;
