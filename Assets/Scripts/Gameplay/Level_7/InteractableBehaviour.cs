@@ -18,7 +18,11 @@ public class InteractableBehaviour : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
-       
+        if (collision.gameObject.tag == "Player")
+        {
+            HintText.text = "Press F to Interact";
+            HintText.enabled = true;
+        }
 
         if (collision.gameObject.tag == "Ground" || collision.gameObject.tag == "Interactable")
         {

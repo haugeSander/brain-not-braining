@@ -18,28 +18,18 @@ public class EndLeve4 : MonoBehaviour
         
     }
 
-    void OnCollisionEnter2D(Collision2D collision)
+    void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.tag == "Player")
         {
+            text.text="Finished level 4... ";
             text.enabled= true;
-            
+             StartCoroutine("EndLevel");
             // SoundManager.instance.PlaySound(HitClip);   
         } 
     }
 
-    void OnCollisionStay2D(Collision2D collision)
-    {
-            if (collision.gameObject.tag == "Player" && Input.GetKeyDown(KeyCode.F))
-        {
-            
-            StartCoroutine("EndLevel");
-            
-            // SoundManager.instance.PlaySound(HitClip);   
-        }  
-    }
-
-    void OnCollisionExit2D(Collision2D other)
+      void OnCollisionExit(Collision other)
     {
         text.enabled = false;
       
@@ -49,7 +39,7 @@ public class EndLeve4 : MonoBehaviour
     {
         Debug.Log("Level Complete!");
         SoundManager.instance.PlaySound(DoorOpeningClip);
-        yield return new WaitForSeconds(4);
+        yield return new WaitForSeconds(DoorOpeningClip.length);
         
         SceneManager.LoadScene("LevelFinished");
     }
