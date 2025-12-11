@@ -9,6 +9,7 @@ public class WallBehaviour: MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
+        Debug.Log("Collided with: " + collision.gameObject.name + " from : " +gameObject.name);
         audioSource.PlayOneShot(audioClip); 
         
     }
