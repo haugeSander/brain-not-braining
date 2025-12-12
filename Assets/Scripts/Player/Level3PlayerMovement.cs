@@ -1,142 +1,238 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using BrainNotBraining.Gameplay;
 
-public class Level3PlayerMovement : MonoBehaviour
+namespace BrainNotBraining.Player
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    private Rigidbody Rigidbody;
-    public float thrust = 1;
-    public AudioSource movementAudio;
-
-    UnityEngine.Vector2 axis;
-    public float JumpForce = 0.4f;
-    private Coroutine fadeRoutine = null;
-    float fadeOutDuration = 0.3f;
-
-    private Camera MainCamera; 
-
-    private Vector2 MouseScreenPosition;
-
-    public GameObject ShockWavePrefab; 
-    public Transform LaunchPointShockWave; 
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    /// <summary>
+    /// Player movement controller for Level 3 (Somatosensory Cortex).
+    /// Handles physics-based WASD movement with audio feedback.
+    /// Integrates with EcholocationSystem for footstep and manual pulse triggering.
+    /// </summary>
+    [RequireComponent(typeof(Rigidbody))]
+    public class Level3PlayerMovement : MonoBehaviour
     {
-        Rigidbody = GetComponent<Rigidbody>();
-        MainCamera = Camera.main;
-    }
+        [Header("Movement Configuration")]
+        [Tooltip("Movement force applied to rigidbody")]
+        public float movementSpeed = 1f;
 
-    // Update is called once per frame
-    private void FixedUpdate()
-    {
+        [Header("Audio Configuration")]
+        [Tooltip("Audio source for movement/footstep sounds")]
+        public AudioSource movementAudio;
 
-      
+        [Tooltip("Fade-out duration when stopping movement (seconds)")]
+        public float fadeOutDuration = 0.3f;
 
-        Rigidbody.AddForce(
-            UnityEngine.Vector3.Normalize(new UnityEngine.Vector3(axis.x, 0.0f, axis.y))
-            * thrust
-            );
+        [Header("Echolocation Configuration")]
+        [Tooltip("Trigger footstep pulse on every step")]
+        public bool enableFootstepPulses = true;
 
-    }
+        [Tooltip("Interval between footstep pulses (seconds)")]
+        public float footstepPulseInterval = 0.5f;
 
-    void OnMove(InputValue input)
-    {
-        axis = input.Get<UnityEngine.Vector2>();
+        [Header("Camera Configuration")]
+        [Tooltip("Main camera for camera-relative movement (auto-finds if not assigned)")]
+        public Camera mainCamera;
 
-        bool isMoving = axis.sqrMagnitude > 0;
+        [Tooltip("Use camera-relative movement (WASD relative to camera view)")]
+        public bool useCameraRelativeMovement = true;
 
-        if (isMoving)
+        // Internal references
+        private Rigidbody rb;
+        private EcholocationSystem echolocationSystem;
+
+        // Movement state
+        private Vector2 moveInput;
+        private bool isMoving = false;
+
+        // Audio state
+        private Coroutine fadeRoutine = null;
+
+        // Footstep pulse state
+        private float lastFootstepPulseTime = -999f;
+
+        private void Awake()
         {
-            if (fadeRoutine != null)
+            rb = GetComponent<Rigidbody>();
+            echolocationSystem = GetComponent<EcholocationSystem>();
+
+            if (echolocationSystem == null)
             {
-                StopCoroutine(fadeRoutine);
-                fadeRoutine = null;
+                Debug.LogWarning("Level3PlayerMovement: No EcholocationSystem found. Footstep pulses will not work.");
             }
-            
-            movementAudio.volume = 1f; 
 
-            if (!movementAudio.isPlaying)
+            // Find main camera if not assigned
+            if (mainCamera == null)
             {
-                movementAudio.Play();
+                mainCamera = Camera.main;
+                if (mainCamera == null)
+                {
+                    Debug.LogError("Level3PlayerMovement: No main camera found! Assign manually or tag camera as MainCamera.");
+                }
             }
         }
-        else
+
+        private void FixedUpdate()
         {
-            if (movementAudio.isPlaying && fadeRoutine == null)
+            // Apply movement force
+            Vector2 filteredInput = ApplyDeadzone(moveInput, 0.2f);
+
+            // Compute direction (or zero)
+            Vector3 moveDirection = Vector3.zero;
+
+            if (filteredInput.sqrMagnitude > 0.01f)
             {
-                fadeRoutine = StartCoroutine(FadeOut(movementAudio, fadeOutDuration));
+                if (useCameraRelativeMovement && mainCamera != null)
+                {
+                    Vector3 cameraForward = mainCamera.transform.forward;
+                    cameraForward.y = 0f;
+                    cameraForward.Normalize();
+
+                    Vector3 cameraRight = mainCamera.transform.right;
+                    cameraRight.y = 0f;
+                    cameraRight.Normalize();
+
+                    moveDirection = (cameraForward * filteredInput.y + cameraRight * filteredInput.x).normalized;
+                }
+                else
+                {
+                    moveDirection = new Vector3(filteredInput.x, 0f, filteredInput.y).normalized;
+                }
+            }
+
+            // Apply velocity
+            Vector3 newVelocity;
+
+            if (moveDirection == Vector3.zero)
+            {
+                // No input → STOP fully except gravity
+                newVelocity = new Vector3(0, rb.linearVelocity.y, 0);
+            }
+            else
+            {
+                // Controlled movement
+                newVelocity = moveDirection * movementSpeed;
+                newVelocity.y = rb.linearVelocity.y;
+            }
+
+            rb.linearVelocity = newVelocity;
+        }
+
+        private Vector2 ApplyDeadzone(Vector2 input, float deadzone)
+        {
+            if (input.sqrMagnitude < deadzone * deadzone)
+                return Vector2.zero;
+
+            return input;
+        }
+
+        /// <summary>
+        /// Input System callback for WASD movement.
+        /// </summary>
+        private void OnMove(InputValue input)
+        {
+            moveInput = input.Get<Vector2>();
+
+            bool wasMoving = isMoving;
+            isMoving = moveInput.sqrMagnitude > 0.01f;
+
+            // Handle movement audio
+            if (isMoving)
+            {
+                // Cancel fade if transitioning from stopped to moving
+                if (fadeRoutine != null)
+                {
+                    StopCoroutine(fadeRoutine);
+                    fadeRoutine = null;
+                }
+
+                movementAudio.volume = 1f;
+
+                if (!movementAudio.isPlaying)
+                {
+                    movementAudio.Play();
+                }
+
+                // Trigger initial footstep pulse when starting to move
+                if (!wasMoving && enableFootstepPulses)
+                {
+                    TriggerFootstepPulse();
+                    lastFootstepPulseTime = Time.time;
+                }
+            }
+            else
+            {
+                // Fade out audio when stopping
+                if (movementAudio.isPlaying && fadeRoutine == null)
+                {
+                    fadeRoutine = StartCoroutine(FadeOutAudio(movementAudio, fadeOutDuration));
+                }
             }
         }
 
-        if(movementAudio.isPlaying)
-            WaveLaunch();
-     
-    }
-
-    public void OnLook(InputValue input)
-    {
-        MouseScreenPosition = input.Get<Vector2>();
-        
-    }
-
-    IEnumerator FadeOut(AudioSource audioSource, float duration)
-    {
-        float startVolume = audioSource.volume;
-        float startTime = Time.time;
-        
-        while (Time.time < startTime + duration)
+        /// <summary>
+        /// Input System callback for manual echolocation pulse (E key).
+        /// </summary>
+        private void OnPulse(InputValue input)
         {
-            float elapsed = Time.time - startTime;
-            audioSource.volume = Mathf.Lerp(startVolume, 0, elapsed / duration);
-            yield return null; 
+            if (echolocationSystem != null)
+            {
+                echolocationSystem.TriggerManualPulse();
+            }
+            else
+            {
+                Debug.LogWarning("Cannot trigger pulse - EcholocationSystem not found");
+            }
         }
 
-        audioSource.volume = 0;
-        audioSource.Stop(); 
-        audioSource.volume = startVolume; 
-        
-        fadeRoutine = null;
+        /// <summary>
+        /// Triggers a footstep echolocation pulse.
+        /// </summary>
+        private void TriggerFootstepPulse()
+        {
+            if (echolocationSystem != null)
+            {
+                echolocationSystem.TriggerFootstepPulse();
+            }
+        }
+
+        /// <summary>
+        /// Fades out audio over specified duration.
+        /// </summary>
+        private IEnumerator FadeOutAudio(AudioSource audioSource, float duration)
+        {
+            float startVolume = audioSource.volume;
+            float elapsed = 0f;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                audioSource.volume = Mathf.Lerp(startVolume, 0f, elapsed / duration);
+                yield return null;
+            }
+
+            audioSource.volume = 0f;
+            audioSource.Stop();
+            audioSource.volume = startVolume; // Reset for next play
+
+            fadeRoutine = null;
+        }
+
+        /// <summary>
+        /// Returns current movement input.
+        /// </summary>
+        public Vector2 GetMoveInput()
+        {
+            return moveInput;
+        }
+
+        /// <summary>
+        /// Returns true if player is currently moving.
+        /// </summary>
+        public bool IsMoving()
+        {
+            return isMoving;
+        }
     }
-
-    public void WaveLaunch()
-    {
-     
-
-        Ray ray = MainCamera.ScreenPointToRay(MouseScreenPosition);
-        RaycastHit hit;
-        
-        Vector3 targetPoint;
-
-        if (Physics.Raycast(ray, out hit, 100f)) 
-        {
-            targetPoint = hit.point;
-            Debug.Log("Hit " + targetPoint);
-        }
-        else
-        {
-            targetPoint = ray.GetPoint(100f); 
-        }
-        //debug 
-        Debug.DrawLine(ray.origin, targetPoint, Color.red, 5.0f);
-        Debug.DrawLine(LaunchPointShockWave.position, targetPoint, Color.green, 6.0f);
-
-
-        Vector3 launchDirection = (targetPoint - LaunchPointShockWave.position).normalized;
-
-        Quaternion launchRotation = Quaternion.LookRotation(launchDirection);
-        GameObject NewShockWave = Instantiate(ShockWavePrefab, LaunchPointShockWave.position, launchRotation);
-        
-        if (NewShockWave.TryGetComponent<ShockWave>(out var ShockWaveScript))
-        {
-            ShockWaveScript.Initialize(launchDirection); 
-        }
-        
-    }
-
-
-   
-
-
 }
