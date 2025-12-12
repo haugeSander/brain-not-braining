@@ -23,6 +23,10 @@ public class ScreenEdgeGlowOnHit : MonoBehaviour
         {
             vignette.intensity.value = 0f;
         }
+        else
+        {
+            Debug.LogWarning($"ScreenEdgeGlowOnHit on {gameObject.name}: Volume or Vignette not found. Edge glow effect will be disabled.");
+        }
     }
 
     private void OnControllerColliderHit(ControllerColliderHit hit)
@@ -34,7 +38,7 @@ public class ScreenEdgeGlowOnHit : MonoBehaviour
         if (!string.IsNullOrEmpty(requiredTag) &&
             !hit.collider.CompareTag(requiredTag)) return;
 
-        if (!isFlashing)
+        if (!isFlashing && vignette != null)
             StartCoroutine(FlashFadeCoroutine());
     }
 
