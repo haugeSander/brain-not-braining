@@ -277,34 +277,17 @@ public class SomatosensoryPuzzle : PuzzleBase
     /// </summary>
     private IEnumerator CompletionSequence()
     {
-        Debug.Log("Level 3 complete! Somatosensory cortex unlocked.");
+        Debug.Log("Level 3 complete! Somatosensory cortex will be unlocked.");
 
         // Wait for completion delay
         yield return new WaitForSeconds(completionDelay);
 
-        // Unlock somatosensory brain region
-        if (ProgressionManager.Instance != null)
-        {
-            ProgressionManager.Instance.UnlockRegion(BrainRegion.Somatosensory);
-            Debug.Log("Somatosensory region unlocked!");
-        }
+        // Set which region should be unlocked (same pattern as Level 0 and 1)
+        ProgressionManager.PendingUnlock = BrainRegion.Somatosensory;
+        Debug.Log("Pending unlock set to Somatosensory");
 
-        // Transition to level complete state
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.OnLevelComplete();
-
-            // Load BrainRegionUnlocked scene
-            yield return new WaitForSeconds(0.5f);
-            GameManager.Instance.LoadLevel("BrainRegionUnlocked");
-        }
-        else
-        {
-            Debug.LogError("SomatosensoryPuzzle: GameManager not found! Cannot complete level properly.");
-
-            // Fallback: load BrainRegionUnlocked scene directly
-            UnityEngine.SceneManagement.SceneManager.LoadScene("BrainRegionUnlocked");
-        }
+        // Load BrainRegionUnlocked scene directly
+        UnityEngine.SceneManagement.SceneManager.LoadScene("BrainRegionUnlocked");
     }
 
     /// <summary>

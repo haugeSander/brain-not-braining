@@ -49,7 +49,7 @@ namespace BrainNotBraining.Gameplay
         [SerializeField] private float initialDelay = 0.5f; // Brief pause before brain appears
         [SerializeField] private float displayDuration = 5f; // How long to show brain
         [SerializeField] private float fadeOutDuration = 1f;
-        [SerializeField] private string nextSceneName = "MainMenu"; // Scene to load after
+        [SerializeField] private string fallbackSceneName = "MainMenu"; // Scene to load if no next level
 
         private BrainRegion currentlyActivatingRegion = BrainRegion.None;
         private Dictionary<BrainRegion, Light> regionLights = new Dictionary<BrainRegion, Light>();
@@ -179,6 +179,9 @@ namespace BrainNotBraining.Gameplay
                 ProgressionManager.Instance.UnlockRegion(newlyUnlockedRegion);
             }
 
+            // Clear the pending unlock now that it's been processed
+            ProgressionManager.PendingUnlock = BrainRegion.None;
+
             // Hold display for viewing
             yield return new WaitForSeconds(displayDuration);
 
@@ -187,26 +190,18 @@ namespace BrainNotBraining.Gameplay
         }
 
         /// <summary>
-        /// Determine which region was just unlocked based on current level
+        /// Determine which region was just unlocked based on the pending unlock
         /// </summary>
         private BrainRegion DetermineNewlyUnlockedRegion()
         {
-            // Check GameManager or ProgressionManager for the current level context
-            // For now, we'll use a simple approach: check what was just completed
-
-            // If ProgressionManager has a "pending" or "next to unlock" state, use that
-            // Otherwise, default to Brainstem for Level 0
-
-            if (GameManager.Instance != null)
+            // Check if there's a pending unlock set by the level that was just completed
+            if (ProgressionManager.PendingUnlock != BrainRegion.None)
             {
-                // You can extend this logic based on scene name or level index
-                string currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
-
-                // For now, assume this scene is only loaded after completing a level
-                // and we determine the region from the most recent unlock attempt
+                Debug.Log($"Using pending unlock: {ProgressionManager.PendingUnlock}");
+                return ProgressionManager.PendingUnlock;
             }
 
-            // Simple fallback: check what's NOT yet unlocked
+            // Fallback: check what's NOT yet unlocked (for backwards compatibility)
             if (ProgressionManager.Instance != null)
             {
                 var unlocked = ProgressionManager.Instance.GetUnlockedRegions();
@@ -223,7 +218,7 @@ namespace BrainNotBraining.Gameplay
                     return BrainRegion.Prefrontal;
             }
 
-            // Default to Brainstem
+            Debug.LogWarning("No pending unlock and all regions unlocked. Defaulting to Brainstem.");
             return BrainRegion.Brainstem;
         }
 
@@ -292,6 +287,29 @@ namespace BrainNotBraining.Gameplay
         }
 
         /// <summary>
+        /// Determines the next scene to load based on the region that was just unlocked
+        /// </summary>
+        private string GetNextSceneName(BrainRegion unlockedRegion)
+        {
+            switch (unlockedRegion)
+            {
+                case BrainRegion.Brainstem:
+                    return "Level_1_Motor_Cortex";
+                case BrainRegion.MotorCortex:
+                    return "Level_3_somatosensory";
+                case BrainRegion.Somatosensory:
+                    return "Level_4_visualcortex";
+                case BrainRegion.VisualCortex:
+                    return "Level_7_PrefrontalCortex";
+                case BrainRegion.Prefrontal:
+                    return fallbackSceneName; // Game complete, return to main menu
+                default:
+                    Debug.LogWarning($"No next scene defined for region {unlockedRegion}, loading fallback");
+                    return fallbackSceneName;
+            }
+        }
+
+        /// <summary>
         /// Fade screen to black and transition to next scene
         /// </summary>
         private IEnumerator FadeOutAndTransition()
@@ -318,8 +336,12 @@ namespace BrainNotBraining.Gameplay
                 GameManager.Instance.OnLevelComplete();
             }
 
+            // Determine next scene based on unlocked region
+            string nextScene = GetNextSceneName(currentlyActivatingRegion);
+            Debug.Log($"Transitioning to next scene: {nextScene}");
+
             // Load next scene
-            UnityEngine.SceneManagement.SceneManager.LoadScene(nextSceneName);
+            UnityEngine.SceneManagement.SceneManager.LoadScene(nextScene);
         }
 
         /// <summary>
