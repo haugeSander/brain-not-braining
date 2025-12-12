@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using BrainNotBraining.Core;
 using BrainNotBraining.Gameplay;
+using TMPro;
 
 /// <summary>
 /// Level 3 puzzle controller for somatosensory perception.
@@ -26,16 +27,26 @@ public class SomatosensoryPuzzle : PuzzleBase
     [Tooltip("Display tutorial text on screen")]
     public bool showTutorialText = true;
 
-    [Tooltip("Tutorial text display duration (seconds)")]
-    public float tutorialDuration = 4f;
+    [Tooltip("Tutorial text UI component (TextMeshPro)")]
+    public TextMeshProUGUI tutorialText;
+
+    [Tooltip("Tutorial text display duration after second message (seconds)")]
+    public float tutorialDuration = 5f;
+
+    [Tooltip("Initial tutorial message")]
+    public string initialTutorialMessage = "Press E, to focus sense";
+
+    [Tooltip("Second tutorial message (after E pressed)")]
+    public string secondTutorialMessage = "Sense your way to the prize";
 
     // References to player systems
     private EcholocationSystem echolocationSystem;
     private EcholocationPulseManager pulseManager;
 
     // State tracking
-    private bool systemsActivated = false;
+    private bool systemsActivated = true;
     private bool playerInGoal = false;
+    private bool firstPulseTriggered = false;
 
     protected override void Start()
     {
@@ -68,15 +79,38 @@ public class SomatosensoryPuzzle : PuzzleBase
             goalAreaCollider.isTrigger = true;
         }
 
-        // Initially disable somatosensory systems (they'll be enabled on activation)
+        // Keep somatosensory systems enabled from start (no activation sequence)
         if (echolocationSystem != null)
         {
-            echolocationSystem.enabled = false;
+            echolocationSystem.enabled = true; // Changed: Keep enabled
         }
 
         if (pulseManager != null)
         {
-            pulseManager.enabled = false;
+            pulseManager.enabled = true; // Changed: Keep enabled
+        }
+
+        // Note: Activation sequence skipped - systems always enabled
+        // If you want the "awakening" sequence, uncomment the line below:
+        // ActivatePuzzle();
+
+        // Show initial tutorial text
+        if (showTutorialText && tutorialText != null)
+        {
+            ShowInitialTutorialText();
+        }
+    }
+
+    private void Update()
+    {
+        // Check for first E press to update tutorial text
+        if (!firstPulseTriggered && showTutorialText && tutorialText != null)
+        {
+            // Check if player has triggered a pulse
+            if (echolocationSystem != null && pulseManager != null && pulseManager.GetActivePulseCount() > 0)
+            {
+                OnFirstPulseTriggered();
+            }
         }
     }
 
@@ -134,15 +168,34 @@ public class SomatosensoryPuzzle : PuzzleBase
     }
 
     /// <summary>
-    /// Displays tutorial text to player (placeholder for UI system).
+    /// Shows initial tutorial text on screen.
     /// </summary>
-    private void DisplayTutorialText()
+    private void ShowInitialTutorialText()
     {
-        // TODO: Integrate with UI system when available
-        // For now, just log to console
-        Debug.Log("[TUTORIAL] Press E to send pulse");
+        if (tutorialText != null)
+        {
+            tutorialText.text = initialTutorialMessage;
+            tutorialText.gameObject.SetActive(true);
+            Debug.Log($"[TUTORIAL] Showing: {initialTutorialMessage}");
+        }
+    }
 
-        StartCoroutine(HideTutorialAfterDelay());
+    /// <summary>
+    /// Called when player triggers first pulse (presses E).
+    /// Switches to second tutorial message.
+    /// </summary>
+    private void OnFirstPulseTriggered()
+    {
+        firstPulseTriggered = true;
+
+        if (tutorialText != null)
+        {
+            tutorialText.text = secondTutorialMessage;
+            Debug.Log($"[TUTORIAL] Showing: {secondTutorialMessage}");
+
+            // Hide tutorial text after delay
+            StartCoroutine(HideTutorialAfterDelay());
+        }
     }
 
     /// <summary>
@@ -151,8 +204,21 @@ public class SomatosensoryPuzzle : PuzzleBase
     private IEnumerator HideTutorialAfterDelay()
     {
         yield return new WaitForSeconds(tutorialDuration);
-        // TODO: Hide UI text
-        Debug.Log("[TUTORIAL] Text faded");
+
+        if (tutorialText != null)
+        {
+            tutorialText.gameObject.SetActive(false);
+            Debug.Log("[TUTORIAL] Text hidden");
+        }
+    }
+
+    /// <summary>
+    /// Displays tutorial text to player (legacy method for ActivatePuzzle sequence).
+    /// </summary>
+    private void DisplayTutorialText()
+    {
+        // If using ActivatePuzzle() sequence, show initial text
+        ShowInitialTutorialText();
     }
 
     /// <summary>
@@ -174,7 +240,7 @@ public class SomatosensoryPuzzle : PuzzleBase
     /// </summary>
     private void OnTriggerEnter(Collider other)
     {
-        if (isSolved || !systemsActivated)
+        if (isSolved)
         {
             return;
         }
@@ -192,6 +258,12 @@ public class SomatosensoryPuzzle : PuzzleBase
     private void OnGoalReached()
     {
         Debug.Log("Player reached goal area!");
+
+        // Hide tutorial text immediately
+        if (tutorialText != null)
+        {
+            tutorialText.gameObject.SetActive(false);
+        }
 
         // Solve puzzle
         Solve();
@@ -222,16 +294,16 @@ public class SomatosensoryPuzzle : PuzzleBase
         {
             GameManager.Instance.OnLevelComplete();
 
-            // Load LevelFinished scene
+            // Load BrainRegionUnlocked scene
             yield return new WaitForSeconds(0.5f);
-            GameManager.Instance.LoadLevel("LevelFinished");
+            GameManager.Instance.LoadLevel("BrainRegionUnlocked");
         }
         else
         {
             Debug.LogError("SomatosensoryPuzzle: GameManager not found! Cannot complete level properly.");
 
-            // Fallback: load LevelFinished scene directly
-            UnityEngine.SceneManagement.SceneManager.LoadScene("LevelFinished");
+            // Fallback: load BrainRegionUnlocked scene directly
+            UnityEngine.SceneManagement.SceneManager.LoadScene("BrainRegionUnlocked");
         }
     }
 
@@ -242,7 +314,7 @@ public class SomatosensoryPuzzle : PuzzleBase
     {
         base.ResetPuzzle();
 
-        systemsActivated = false;
+        systemsActivated = true;
         playerInGoal = false;
 
         // Disable systems

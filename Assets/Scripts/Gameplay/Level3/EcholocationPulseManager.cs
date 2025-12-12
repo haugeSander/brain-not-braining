@@ -189,6 +189,12 @@ namespace BrainNotBraining.Gameplay
             Shader.SetGlobalVector(PulseDataID, pulseData);
             Shader.SetGlobalFloat(PulseBrightnessID, strongestPulse.currentBrightness);
             Shader.SetGlobalFloat(PulseMaxRadiusID, strongestPulse.maxRadius);
+
+            // Debug logging to verify shader updates
+            if (debugMode && activePulses.Count > 0)
+            {
+                Debug.Log($"[PULSE SHADER UPDATE] Active: {activePulses.Count} | Position: ({pulseData.x:F1}, {pulseData.y:F1}, {pulseData.z:F1}) | Radius: {strongestPulse.currentRadius:F2}/{strongestPulse.maxRadius:F1}m | Brightness: {strongestPulse.currentBrightness:F3}");
+            }
         }
 
         /// <summary>
