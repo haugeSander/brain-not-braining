@@ -897,7 +897,15 @@ public class ReflexBreathPuzzle : PuzzleBase
     /// </summary>
     private System.Collections.IEnumerator WinSequenceCoroutine()
     {
-        // Step 1: Slow fade to white (dramatic buildup)
+        // Step 1: Stop music and other audio
+        // Fade out all audio except heartbeat
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.FadeOutAllExceptHeartbeat(5f);
+            AudioManager.Instance.EchoHeartbeat(); // Echo and fade the heartbeat too
+        }
+
+        // Step 2: Slow fade to white (dramatic buildup)
         if (screenFlash != null)
         {
             bool fadeComplete = false;
@@ -917,7 +925,7 @@ public class ReflexBreathPuzzle : PuzzleBase
             yield return new WaitForSeconds(fadeToWhiteDuration);
         }
 
-        // Step 2: Load the brain visualization scene
+        // Step 3: Load the brain visualization scene
         UnityEngine.SceneManagement.SceneManager.LoadScene(brainVisualizationScene);
     }
 
