@@ -38,6 +38,13 @@ namespace BrainNotBraining.Player
         [Tooltip("Use camera-relative movement (WASD relative to camera view)")]
         public bool useCameraRelativeMovement = true;
 
+        [Header("Debug Configuration")]
+        [Tooltip("Enable debug teleport with F key")]
+        public bool enableDebugTeleport = true;
+
+        [Tooltip("Debug teleport target position")]
+        public Vector3 debugTeleportPosition = new Vector3(-17f, 0f, -32f);
+
         // Internal references
         private Rigidbody rb;
         private EcholocationSystem echolocationSystem;
@@ -73,58 +80,79 @@ namespace BrainNotBraining.Player
             }
         }
 
+        private void Update()
+        {
+            // Debug teleport
+            if (enableDebugTeleport && Input.GetKeyDown(KeyCode.F))
+            {
+                DebugTeleport();
+            }
+        }
+
         private void FixedUpdate()
         {
-            // Apply movement force
-            Vector2 filteredInput = ApplyDeadzone(moveInput, 0.2f);
+            // Per-axis deadzone so one axis doesn't kill the other
+            Vector2 filteredInput = ApplyPerAxisDeadzone(moveInput, 0.12f); // try 0.12; adjust smaller if needed
 
-            // Compute direction (or zero)
-            Vector3 moveDirection = Vector3.zero;
-
-            if (filteredInput.sqrMagnitude > 0.01f)
+            // Early-out: no horizontal input → keep only vertical velocity (gravity)
+            if (Mathf.Approximately(filteredInput.x, 0f) && Mathf.Approximately(filteredInput.y, 0f))
             {
-                if (useCameraRelativeMovement && mainCamera != null)
-                {
-                    Vector3 cameraForward = mainCamera.transform.forward;
-                    cameraForward.y = 0f;
-                    cameraForward.Normalize();
-
-                    Vector3 cameraRight = mainCamera.transform.right;
-                    cameraRight.y = 0f;
-                    cameraRight.Normalize();
-
-                    moveDirection = (cameraForward * filteredInput.y + cameraRight * filteredInput.x).normalized;
-                }
-                else
-                {
-                    moveDirection = new Vector3(filteredInput.x, 0f, filteredInput.y).normalized;
-                }
+                rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
+                return;
             }
 
-            // Apply velocity
-            Vector3 newVelocity;
+            // Build basis vectors (camera relative or world)
+            Vector3 forward;
+            Vector3 right;
 
-            if (moveDirection == Vector3.zero)
+            if (useCameraRelativeMovement && mainCamera != null)
             {
-                // No input → STOP fully except gravity
-                newVelocity = new Vector3(0, rb.linearVelocity.y, 0);
+                forward = mainCamera.transform.forward;
+                forward.y = 0f;
+                forward.Normalize();
+
+                right = mainCamera.transform.right;
+                right.y = 0f;
+                right.Normalize();
             }
             else
             {
-                // Controlled movement
-                newVelocity = moveDirection * movementSpeed;
-                newVelocity.y = rb.linearVelocity.y;
+                forward = Vector3.forward;
+                right = Vector3.right;
             }
 
-            rb.linearVelocity = newVelocity;
+            // Compute target horizontal velocity (no premature normalization)
+            Vector3 targetHorizontalVel = forward * filteredInput.y * movementSpeed + right * filteredInput.x * movementSpeed;
+
+            // Clamp magnitude so diagonal doesn't exceed movementSpeed
+            targetHorizontalVel = Vector3.ClampMagnitude(targetHorizontalVel, movementSpeed);
+
+            // Compose final velocity (preserve vertical velocity)
+            Vector3 finalVel = new Vector3(targetHorizontalVel.x, rb.linearVelocity.y, targetHorizontalVel.z);
+
+            rb.linearVelocity = finalVel;
+
+            // Optional debug: uncomment if you want to inspect values
+            // Debug.Log($"moveInput: {moveInput}, filtered: {filteredInput}, targetHorVel: {targetHorizontalVel}, finalVel: {finalVel}");
         }
 
-        private Vector2 ApplyDeadzone(Vector2 input, float deadzone)
+        private Vector2 ApplyPerAxisDeadzone(Vector2 input, float deadzone)
         {
-            if (input.sqrMagnitude < deadzone * deadzone)
-                return Vector2.zero;
+            Vector2 outInput = Vector2.zero;
 
-            return input;
+            // X axis
+            if (Mathf.Abs(input.x) >= deadzone)
+                outInput.x = input.x;
+            else
+                outInput.x = 0f;
+
+            // Y axis
+            if (Mathf.Abs(input.y) >= deadzone)
+                outInput.y = input.y;
+            else
+                outInput.y = 0f;
+
+            return outInput;
         }
 
         /// <summary>
@@ -217,6 +245,29 @@ namespace BrainNotBraining.Player
             audioSource.volume = startVolume; // Reset for next play
 
             fadeRoutine = null;
+        }
+
+        /// <summary>
+        /// Debug teleport to target position (preserves Y coordinate).
+        /// </summary>
+        private void DebugTeleport()
+        {
+            // Preserve current Y position
+            Vector3 targetPosition = new Vector3(
+                debugTeleportPosition.x,
+                transform.position.y, // Keep current Y
+                debugTeleportPosition.z
+            );
+
+            transform.position = targetPosition;
+
+            // Reset velocity to prevent momentum carrying over
+            if (rb != null)
+            {
+                rb.linearVelocity = Vector3.zero;
+            }
+
+            Debug.Log($"Debug teleported to: {targetPosition}");
         }
 
         /// <summary>

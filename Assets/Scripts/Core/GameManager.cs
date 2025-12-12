@@ -88,7 +88,7 @@ namespace BrainNotBraining.Core
         public void OnLevelComplete()
         {
             _currentState = GameState.LEVELCOMPLETE;
-            ProgressionManager.Instance.UnlockRegion(BrainRegion.Brainstem);
+            // Note: Region unlocking is now handled by BrainRegionActivator using PendingUnlock
             Debug.Log("Level complete!");
         }
 

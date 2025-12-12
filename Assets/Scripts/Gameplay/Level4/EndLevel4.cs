@@ -2,55 +2,58 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using BrainNotBraining.Core;
 
 public class EndLeve4 : MonoBehaviour
 {
+    private const string BRAIN_REGION_SCENE = "BrainRegionUnlocked";
+
     public TextMeshProUGUI text;
     public AudioClip DoorOpeningClip;
+    private bool levelCompleted = false;
 
     public void Start()
     {
-        text.enabled = false;
-    }
-
-    public void Update()
-    {
-        
+        if (text != null)
+            text.enabled = false;
     }
 
     void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.tag == "Player")
+        if (collision.gameObject.tag == "Player" && !levelCompleted)
         {
-            text.enabled= true;
-            
-            // SoundManager.instance.PlaySound(HitClip);   
-        } 
+            if (text != null)
+                text.enabled = true;
+        }
     }
 
     void OnCollisionStay2D(Collision2D collision)
     {
-            if (collision.gameObject.tag == "Player" && Input.GetKeyDown(KeyCode.F))
+        if (collision.gameObject.tag == "Player" && Input.GetKeyDown(KeyCode.F) && !levelCompleted)
         {
-            
-            StartCoroutine("EndLevel");
-            
-            // SoundManager.instance.PlaySound(HitClip);   
-        }  
+            levelCompleted = true;
+            StartCoroutine(EndLevel());
+        }
     }
 
     void OnCollisionExit2D(Collision2D other)
     {
-        text.enabled = false;
-      
+        if (text != null && !levelCompleted)
+            text.enabled = false;
     }
 
-     IEnumerator EndLevel()
+    IEnumerator EndLevel()
     {
-        Debug.Log("Level Complete!");
-        SoundManager.instance.PlaySound(DoorOpeningClip);
+        Debug.Log("Level 4 completed! Loading brain region unlock scene...");
+
+        if (SoundManager.instance != null && DoorOpeningClip != null)
+            SoundManager.instance.PlaySound(DoorOpeningClip);
+
         yield return new WaitForSeconds(4);
-        
-        SceneManager.LoadScene("LevelFinished");
+
+        // Set which region should be unlocked (Level 4 unlocks VisualCortex)
+        ProgressionManager.PendingUnlock = BrainRegion.VisualCortex;
+
+        SceneManager.LoadScene(BRAIN_REGION_SCENE);
     }
 }
