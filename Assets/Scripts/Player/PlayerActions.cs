@@ -637,6 +637,246 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""Level4PlayerActionsNew"",
+            ""id"": ""1e77cf91-cbe6-48da-aeeb-8853656ca543"",
+            ""actions"": [
+                {
+                    ""name"": ""Move"",
+                    ""type"": ""Value"",
+                    ""id"": ""12bef45e-add8-416b-866e-3902145de07c"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""Look"",
+                    ""type"": ""Value"",
+                    ""id"": ""0651930e-0900-403d-9a44-956a93ea498a"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""Jump"",
+                    ""type"": ""Button"",
+                    ""id"": ""1b03bc1b-74de-4347-90f7-d17398803741"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Sprint"",
+                    ""type"": ""PassThrough"",
+                    ""id"": ""d56dff43-7890-4a19-84af-de84503bc248"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Use"",
+                    ""type"": ""Button"",
+                    ""id"": ""b5136f59-314f-4575-92ac-f5f6e187080c"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": ""WASD"",
+                    ""id"": ""88aaaeae-d7b8-4f06-ba33-2b6fa3161069"",
+                    ""path"": ""2DVector(mode=1)"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Move"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""up"",
+                    ""id"": ""7d5b0101-fd92-43b3-bb78-a8f6cf9e06bf"",
+                    ""path"": ""<Keyboard>/w"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""Move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""down"",
+                    ""id"": ""86a9e020-8462-4750-9022-9eb2b77c5a63"",
+                    ""path"": ""<Keyboard>/s"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""Move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""left"",
+                    ""id"": ""382c5016-17bd-4a69-92dd-647741a29ee9"",
+                    ""path"": ""<Keyboard>/a"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""Move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""right"",
+                    ""id"": ""793aa799-30f3-4ca6-ad78-4fb6edf1fbad"",
+                    ""path"": ""<Keyboard>/d"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""Move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""up"",
+                    ""id"": ""108f1293-bf6c-4cf7-87dd-33c7f39461be"",
+                    ""path"": ""<Keyboard>/upArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""Move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""down"",
+                    ""id"": ""c59fe9be-bb0d-44ec-a082-e9cc60c4dcb5"",
+                    ""path"": ""<Keyboard>/downArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""Move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""left"",
+                    ""id"": ""98cb4e34-e7f1-47d8-a5ac-b8f9c02033f2"",
+                    ""path"": ""<Keyboard>/leftArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""Move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""right"",
+                    ""id"": ""b928166d-3a47-459e-9ccd-99f74bc693d8"",
+                    ""path"": ""<Keyboard>/rightArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""Move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""0b879d86-0cab-4281-b07d-62684569e153"",
+                    ""path"": ""<Gamepad>/leftStick"",
+                    ""interactions"": """",
+                    ""processors"": ""StickDeadzone"",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""Move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""40a1fb84-fe7f-46cf-8026-1df6374dd002"",
+                    ""path"": ""<Gamepad>/rightStick"",
+                    ""interactions"": """",
+                    ""processors"": ""InvertVector2(invertX=false),StickDeadzone,ScaleVector2(x=300,y=300)"",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""Look"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""5bd1a977-24f8-4755-8034-6ce2ad73252b"",
+                    ""path"": ""<Pointer>/delta"",
+                    ""interactions"": """",
+                    ""processors"": ""ScaleVector2(x=2,y=2),InvertVector2(invertX=false)"",
+                    ""groups"": """",
+                    ""action"": ""Look"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""8eebe3a6-ed5e-4072-a21d-7a060116ea58"",
+                    ""path"": ""<Keyboard>/space"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""Jump"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""6eb9b28a-d23a-435a-b6be-241254e30a99"",
+                    ""path"": ""<Gamepad>/buttonSouth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""Jump"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a2893acb-1845-4554-9ff3-c0c02da9be86"",
+                    ""path"": ""<Keyboard>/leftShift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""Sprint"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""6ce5860d-8aa1-4f76-ac40-b03e86cd1d7c"",
+                    ""path"": ""<Gamepad>/leftTrigger"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""Sprint"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""4d498b49-03ef-40cf-8115-b3d0117236f2"",
+                    ""path"": ""<Keyboard>/f"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Use"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": []
@@ -665,6 +905,13 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         m_Level4PlayerActions_Move = m_Level4PlayerActions.FindAction("Move", throwIfNotFound: true);
         m_Level4PlayerActions_Use = m_Level4PlayerActions.FindAction("Use", throwIfNotFound: true);
         m_Level4PlayerActions_Jump = m_Level4PlayerActions.FindAction("Jump", throwIfNotFound: true);
+        // Level4PlayerActionsNew
+        m_Level4PlayerActionsNew = asset.FindActionMap("Level4PlayerActionsNew", throwIfNotFound: true);
+        m_Level4PlayerActionsNew_Move = m_Level4PlayerActionsNew.FindAction("Move", throwIfNotFound: true);
+        m_Level4PlayerActionsNew_Look = m_Level4PlayerActionsNew.FindAction("Look", throwIfNotFound: true);
+        m_Level4PlayerActionsNew_Jump = m_Level4PlayerActionsNew.FindAction("Jump", throwIfNotFound: true);
+        m_Level4PlayerActionsNew_Sprint = m_Level4PlayerActionsNew.FindAction("Sprint", throwIfNotFound: true);
+        m_Level4PlayerActionsNew_Use = m_Level4PlayerActionsNew.FindAction("Use", throwIfNotFound: true);
     }
 
     ~@PlayerActions()
@@ -673,6 +920,7 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         UnityEngine.Debug.Assert(!m_Level7PlayerActions.enabled, "This will cause a leak and performance issues, PlayerActions.Level7PlayerActions.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_Level3PlayerActions.enabled, "This will cause a leak and performance issues, PlayerActions.Level3PlayerActions.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_Level4PlayerActions.enabled, "This will cause a leak and performance issues, PlayerActions.Level4PlayerActions.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_Level4PlayerActionsNew.enabled, "This will cause a leak and performance issues, PlayerActions.Level4PlayerActionsNew.Disable() has not been called.");
     }
 
     /// <summary>
@@ -1260,6 +1508,146 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
     /// Provides a new <see cref="Level4PlayerActionsActions" /> instance referencing this action map.
     /// </summary>
     public Level4PlayerActionsActions @Level4PlayerActions => new Level4PlayerActionsActions(this);
+
+    // Level4PlayerActionsNew
+    private readonly InputActionMap m_Level4PlayerActionsNew;
+    private List<ILevel4PlayerActionsNewActions> m_Level4PlayerActionsNewActionsCallbackInterfaces = new List<ILevel4PlayerActionsNewActions>();
+    private readonly InputAction m_Level4PlayerActionsNew_Move;
+    private readonly InputAction m_Level4PlayerActionsNew_Look;
+    private readonly InputAction m_Level4PlayerActionsNew_Jump;
+    private readonly InputAction m_Level4PlayerActionsNew_Sprint;
+    private readonly InputAction m_Level4PlayerActionsNew_Use;
+    /// <summary>
+    /// Provides access to input actions defined in input action map "Level4PlayerActionsNew".
+    /// </summary>
+    public struct Level4PlayerActionsNewActions
+    {
+        private @PlayerActions m_Wrapper;
+
+        /// <summary>
+        /// Construct a new instance of the input action map wrapper class.
+        /// </summary>
+        public Level4PlayerActionsNewActions(@PlayerActions wrapper) { m_Wrapper = wrapper; }
+        /// <summary>
+        /// Provides access to the underlying input action "Level4PlayerActionsNew/Move".
+        /// </summary>
+        public InputAction @Move => m_Wrapper.m_Level4PlayerActionsNew_Move;
+        /// <summary>
+        /// Provides access to the underlying input action "Level4PlayerActionsNew/Look".
+        /// </summary>
+        public InputAction @Look => m_Wrapper.m_Level4PlayerActionsNew_Look;
+        /// <summary>
+        /// Provides access to the underlying input action "Level4PlayerActionsNew/Jump".
+        /// </summary>
+        public InputAction @Jump => m_Wrapper.m_Level4PlayerActionsNew_Jump;
+        /// <summary>
+        /// Provides access to the underlying input action "Level4PlayerActionsNew/Sprint".
+        /// </summary>
+        public InputAction @Sprint => m_Wrapper.m_Level4PlayerActionsNew_Sprint;
+        /// <summary>
+        /// Provides access to the underlying input action "Level4PlayerActionsNew/Use".
+        /// </summary>
+        public InputAction @Use => m_Wrapper.m_Level4PlayerActionsNew_Use;
+        /// <summary>
+        /// Provides access to the underlying input action map instance.
+        /// </summary>
+        public InputActionMap Get() { return m_Wrapper.m_Level4PlayerActionsNew; }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Enable()" />
+        public void Enable() { Get().Enable(); }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Disable()" />
+        public void Disable() { Get().Disable(); }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.enabled" />
+        public bool enabled => Get().enabled;
+        /// <summary>
+        /// Implicitly converts an <see ref="Level4PlayerActionsNewActions" /> to an <see ref="InputActionMap" /> instance.
+        /// </summary>
+        public static implicit operator InputActionMap(Level4PlayerActionsNewActions set) { return set.Get(); }
+        /// <summary>
+        /// Adds <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+        /// </summary>
+        /// <param name="instance">Callback instance.</param>
+        /// <remarks>
+        /// If <paramref name="instance" /> is <c>null</c> or <paramref name="instance"/> have already been added this method does nothing.
+        /// </remarks>
+        /// <seealso cref="Level4PlayerActionsNewActions" />
+        public void AddCallbacks(ILevel4PlayerActionsNewActions instance)
+        {
+            if (instance == null || m_Wrapper.m_Level4PlayerActionsNewActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_Level4PlayerActionsNewActionsCallbackInterfaces.Add(instance);
+            @Move.started += instance.OnMove;
+            @Move.performed += instance.OnMove;
+            @Move.canceled += instance.OnMove;
+            @Look.started += instance.OnLook;
+            @Look.performed += instance.OnLook;
+            @Look.canceled += instance.OnLook;
+            @Jump.started += instance.OnJump;
+            @Jump.performed += instance.OnJump;
+            @Jump.canceled += instance.OnJump;
+            @Sprint.started += instance.OnSprint;
+            @Sprint.performed += instance.OnSprint;
+            @Sprint.canceled += instance.OnSprint;
+            @Use.started += instance.OnUse;
+            @Use.performed += instance.OnUse;
+            @Use.canceled += instance.OnUse;
+        }
+
+        /// <summary>
+        /// Removes <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+        /// </summary>
+        /// <remarks>
+        /// Calling this method when <paramref name="instance" /> have not previously been registered has no side-effects.
+        /// </remarks>
+        /// <seealso cref="Level4PlayerActionsNewActions" />
+        private void UnregisterCallbacks(ILevel4PlayerActionsNewActions instance)
+        {
+            @Move.started -= instance.OnMove;
+            @Move.performed -= instance.OnMove;
+            @Move.canceled -= instance.OnMove;
+            @Look.started -= instance.OnLook;
+            @Look.performed -= instance.OnLook;
+            @Look.canceled -= instance.OnLook;
+            @Jump.started -= instance.OnJump;
+            @Jump.performed -= instance.OnJump;
+            @Jump.canceled -= instance.OnJump;
+            @Sprint.started -= instance.OnSprint;
+            @Sprint.performed -= instance.OnSprint;
+            @Sprint.canceled -= instance.OnSprint;
+            @Use.started -= instance.OnUse;
+            @Use.performed -= instance.OnUse;
+            @Use.canceled -= instance.OnUse;
+        }
+
+        /// <summary>
+        /// Unregisters <param cref="instance" /> and unregisters all input action callbacks via <see cref="Level4PlayerActionsNewActions.UnregisterCallbacks(ILevel4PlayerActionsNewActions)" />.
+        /// </summary>
+        /// <seealso cref="Level4PlayerActionsNewActions.UnregisterCallbacks(ILevel4PlayerActionsNewActions)" />
+        public void RemoveCallbacks(ILevel4PlayerActionsNewActions instance)
+        {
+            if (m_Wrapper.m_Level4PlayerActionsNewActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        /// <summary>
+        /// Replaces all existing callback instances and previously registered input action callbacks associated with them with callbacks provided via <param cref="instance" />.
+        /// </summary>
+        /// <remarks>
+        /// If <paramref name="instance" /> is <c>null</c>, calling this method will only unregister all existing callbacks but not register any new callbacks.
+        /// </remarks>
+        /// <seealso cref="Level4PlayerActionsNewActions.AddCallbacks(ILevel4PlayerActionsNewActions)" />
+        /// <seealso cref="Level4PlayerActionsNewActions.RemoveCallbacks(ILevel4PlayerActionsNewActions)" />
+        /// <seealso cref="Level4PlayerActionsNewActions.UnregisterCallbacks(ILevel4PlayerActionsNewActions)" />
+        public void SetCallbacks(ILevel4PlayerActionsNewActions instance)
+        {
+            foreach (var item in m_Wrapper.m_Level4PlayerActionsNewActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_Level4PlayerActionsNewActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    /// <summary>
+    /// Provides a new <see cref="Level4PlayerActionsNewActions" /> instance referencing this action map.
+    /// </summary>
+    public Level4PlayerActionsNewActions @Level4PlayerActionsNew => new Level4PlayerActionsNewActions(this);
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Level0PlayerActions" which allows adding and removing callbacks.
     /// </summary>
@@ -1403,5 +1791,48 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnJump(InputAction.CallbackContext context);
+    }
+    /// <summary>
+    /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Level4PlayerActionsNew" which allows adding and removing callbacks.
+    /// </summary>
+    /// <seealso cref="Level4PlayerActionsNewActions.AddCallbacks(ILevel4PlayerActionsNewActions)" />
+    /// <seealso cref="Level4PlayerActionsNewActions.RemoveCallbacks(ILevel4PlayerActionsNewActions)" />
+    public interface ILevel4PlayerActionsNewActions
+    {
+        /// <summary>
+        /// Method invoked when associated input action "Move" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnMove(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Look" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnLook(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Jump" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnJump(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Sprint" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnSprint(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Use" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnUse(InputAction.CallbackContext context);
     }
 }
