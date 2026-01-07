@@ -51,10 +51,16 @@ namespace BrainNotBraining.Gameplay
         [SerializeField] private float fadeOutDuration = 1f;
         [SerializeField] private string fallbackSceneName = "MainMenu"; // Scene to load if no next level
 
+        [Header("Usability")]
+        [SerializeField] private KeyCode skipCutsceneButton = KeyCode.S;
+
+
         private BrainRegion currentlyActivatingRegion = BrainRegion.None;
         private Dictionary<BrainRegion, Light> regionLights = new Dictionary<BrainRegion, Light>();
         private Dictionary<BrainRegion, ParticleSystem> regionParticles = new Dictionary<BrainRegion, ParticleSystem>();
         private ScreenFlash screenFlash;
+
+        private bool isTransitioning = false;
 
         private void Awake()
         {
@@ -99,6 +105,18 @@ namespace BrainNotBraining.Gameplay
                     particles.Stop();
                 }
             }
+
+            if (brainMaterial != null)
+            {
+                // Create a temporary copy of the material just for this run
+                brainMaterial = new Material(brainMaterial);
+
+                // Apply this new copy to the renderer(s)
+                var renderers = brainModel.GetComponentsInChildren<Renderer>();
+                foreach (var r in renderers) r.material = brainMaterial;
+
+                SetBrainTransparency(brainTransparency);
+            }
         }
 
         private void Start()
@@ -120,8 +138,31 @@ namespace BrainNotBraining.Gameplay
                 // Keep the camera pointed at the brain
                 cameraTransform.LookAt(brainModel.transform);
             }
+
+            // Check Input directly here
+            if (Input.GetKeyDown(skipCutsceneButton))
+            {
+                HandleSkip();
+            }
         }
 
+        // Helper function to handle the logic safely
+        private void HandleSkip()
+        {
+            // Safety: Don't skip if we are already fading out!
+            if (isTransitioning) return;
+
+            Debug.Log("Skipping Cutscene...");
+
+            // Set flag so we don't trigger this twice
+            isTransitioning = true;
+
+            // Stop the activation sequence so it doesn't keep playing sounds/particles
+            StopAllCoroutines();
+
+            // Immediately start the fade out
+            StartCoroutine(FadeOutAndTransition());
+        }
         private IEnumerator FlickerLight(Light light, float duration, float targetIntensity, float flickerAmount)
         {
             float elapsed = 0f;
@@ -300,12 +341,12 @@ namespace BrainNotBraining.Gameplay
                 case BrainRegion.Somatosensory:
                     return "Level_4_visualcortex";
                 case BrainRegion.VisualCortex:
-                    return "Level_7_PrefrontalCortex";
+                    return "Puzzle_6";
                 case BrainRegion.Prefrontal:
-                    return fallbackSceneName; // Game complete, return to main menu
+                    return "Level_7_PrefrontalCortex";
                 default:
                     Debug.LogWarning($"No next scene defined for region {unlockedRegion}, loading fallback");
-                    return fallbackSceneName;
+                    return fallbackSceneName; // Game complete, return to main menu
             }
         }
 
@@ -351,24 +392,11 @@ namespace BrainNotBraining.Gameplay
         {
             if (brainMaterial == null) return;
 
-            // Enable transparency on the material
-            brainMaterial.SetFloat("_Surface", 1); // Transparent
-            brainMaterial.SetFloat("_Blend", 0); // Alpha blend
-
-            // Set rendering mode properties
-            brainMaterial.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-            brainMaterial.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-            brainMaterial.SetInt("_ZWrite", 0);
-            brainMaterial.renderQueue = 3000;
-
-            // Set alpha
-            Color color = brainMaterial.color;
-            color.a = alpha;
-            brainMaterial.color = color;
-
-            // Also set base color if using URP
+            // Use _BaseColor because that is what we named it in the Shader code above!
             if (brainMaterial.HasProperty("_BaseColor"))
             {
+                Color color = brainMaterial.GetColor("_BaseColor");
+                color.a = alpha;
                 brainMaterial.SetColor("_BaseColor", color);
             }
         }
