@@ -2,12 +2,13 @@ using UnityEngine;
 using BrainNotBraining.Core;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 
 namespace BrainNotBraining.Gameplay
 {
     /// <summary>
     /// Manages the dramatic 3D mouse brain visualization scene.
-    /// Lights up brain regions based on progression, with particle effects.
+    /// Activates brain regions based on progression, with particle effects.
     /// </summary>
     public class BrainRegionActivator : MonoBehaviour
     {
@@ -20,19 +21,6 @@ namespace BrainNotBraining.Gameplay
         [SerializeField] private Transform cameraTransform;
         [SerializeField] private float rotationSpeed = 20f; // Slow rotation for drama
         [SerializeField] private bool autoRotate = true;
-
-        [Header("Region Lights")]
-        [SerializeField] private Light brainstemLight;
-        [SerializeField] private Light motorCortexLight;
-        [SerializeField] private Light somatosensoryLight;
-        [SerializeField] private Light visualCortexLight;
-        [SerializeField] private Light prefrontalLight;
-
-        [Header("Light Settings")]
-        [SerializeField] private Color activeLightColor = new Color(0f, 1f, 1f, 1f); // Cyan
-        [SerializeField] private float lightIntensity = 2f;
-        [SerializeField] private float lightRange = 5f;
-        [SerializeField] private float lightActivationDuration = 2f; // Fade in time
 
         [Header("Particle Systems")]
         [SerializeField] private ParticleSystem brainstemParticles;
@@ -54,9 +42,11 @@ namespace BrainNotBraining.Gameplay
         [Header("Usability")]
         [SerializeField] private KeyCode skipCutsceneButton = KeyCode.S;
 
+        [Header("UI")]
+        [SerializeField] private TextMeshProUGUI unlockedRegionText; // Assign your UI Text element here
+
 
         private BrainRegion currentlyActivatingRegion = BrainRegion.None;
-        private Dictionary<BrainRegion, Light> regionLights = new Dictionary<BrainRegion, Light>();
         private Dictionary<BrainRegion, ParticleSystem> regionParticles = new Dictionary<BrainRegion, ParticleSystem>();
         private ScreenFlash screenFlash;
 
@@ -64,13 +54,6 @@ namespace BrainNotBraining.Gameplay
 
         private void Awake()
         {
-            // Build lookup dictionaries
-            regionLights[BrainRegion.Brainstem] = brainstemLight;
-            regionLights[BrainRegion.MotorCortex] = motorCortexLight;
-            regionLights[BrainRegion.Somatosensory] = somatosensoryLight;
-            regionLights[BrainRegion.VisualCortex] = visualCortexLight;
-            regionLights[BrainRegion.Prefrontal] = prefrontalLight;
-
             regionParticles[BrainRegion.Brainstem] = brainstemParticles;
             regionParticles[BrainRegion.MotorCortex] = motorCortexParticles;
             regionParticles[BrainRegion.Somatosensory] = somatosensoryParticles;
@@ -84,17 +67,6 @@ namespace BrainNotBraining.Gameplay
             if (brainMaterial != null)
             {
                 SetBrainTransparency(brainTransparency);
-            }
-
-            // Start all lights off
-            foreach (var light in regionLights.Values)
-            {
-                if (light != null)
-                {
-                    light.intensity = 0f;
-                    light.color = activeLightColor;
-                    light.range = lightRange;
-                }
             }
 
             // Stop all particle systems
@@ -116,6 +88,12 @@ namespace BrainNotBraining.Gameplay
                 foreach (var r in renderers) r.material = brainMaterial;
 
                 SetBrainTransparency(brainTransparency);
+            }
+            
+            // Disable text at start
+            if (unlockedRegionText != null)
+            {
+                unlockedRegionText.gameObject.SetActive(false);
             }
         }
 
@@ -163,31 +141,9 @@ namespace BrainNotBraining.Gameplay
             // Immediately start the fade out
             StartCoroutine(FadeOutAndTransition());
         }
-        private IEnumerator FlickerLight(Light light, float duration, float targetIntensity, float flickerAmount)
-        {
-            float elapsed = 0f;
-
-            while (elapsed < duration)
-            {
-                elapsed += Time.deltaTime;
-
-                // Smooth fade-in
-                float baseIntensity = Mathf.Lerp(0f, targetIntensity, elapsed / duration);
-
-                // Random flicker (tiny, jittery offset)
-                float flicker = Random.Range(-flickerAmount, flickerAmount);
-
-                light.intensity = Mathf.Clamp(baseIntensity + flicker, 0f, targetIntensity);
-
-                yield return null;
-            }
-
-            light.intensity = targetIntensity;
-        }
-
 
         /// <summary>
-        /// Main sequence: fade in, light up regions, display, fade out, transition
+        /// Main sequence: fade in, activate regions, display, fade out, transition
         /// </summary>
         private IEnumerator ActivationSequence()
         {
@@ -200,6 +156,13 @@ namespace BrainNotBraining.Gameplay
 
             Debug.Log($"BrainRegionActivator: Activating region {newlyUnlockedRegion}");
 
+            // Display unlocked region text
+            if (unlockedRegionText != null)
+            {
+                unlockedRegionText.text = $"{GetFriendlyRegionName(newlyUnlockedRegion)} Unlocked";
+                unlockedRegionText.gameObject.SetActive(true);
+            }
+
             // Play dramatic music
             if (regionUnlockSound != null)
             {
@@ -207,11 +170,11 @@ namespace BrainNotBraining.Gameplay
                 dramaticMusicSource.Play();
             }
 
-            // Light up previously unlocked regions instantly (no particles)
-            yield return StartCoroutine(LightUpPreviousRegions(newlyUnlockedRegion));
+            // Play effects for previously unlocked regions
+            yield return StartCoroutine(ActivatePreviousRegions(newlyUnlockedRegion));
 
-            // Light up the newly unlocked region with particles and drama
-            yield return StartCoroutine(LightUpRegion(newlyUnlockedRegion, true));
+            // Play effects for the newly unlocked region with particles and drama
+            yield return StartCoroutine(ActivateRegion(newlyUnlockedRegion, true));
 
 
             // Save the newly unlocked region to progression
@@ -264,9 +227,9 @@ namespace BrainNotBraining.Gameplay
         }
 
         /// <summary>
-        /// Light up all previously unlocked regions (no particles, instant)
+        /// Plays the neuron firing particles for all previously unlocked regions.
         /// </summary>
-        private IEnumerator LightUpPreviousRegions(BrainRegion excludeRegion)
+        private IEnumerator ActivatePreviousRegions(BrainRegion excludeRegion)
         {
             if (ProgressionManager.Instance == null)
                 yield break;
@@ -277,10 +240,19 @@ namespace BrainNotBraining.Gameplay
             {
                 if (region != excludeRegion && region != BrainRegion.None)
                 {
-                    // Light up instantly (no animation)
-                    if (regionLights.ContainsKey(region) && regionLights[region] != null)
+                    // Play neuron firing sub-emitters for previously unlocked regions
+                    if (regionParticles.ContainsKey(region) && regionParticles[region] != null)
                     {
-                        regionLights[region].intensity = lightIntensity;
+                        var mainPS = regionParticles[region];
+                        var subEmitters = mainPS.subEmitters;
+                        for (int i = 0; i < subEmitters.subEmittersCount; i++)
+                        {
+                            ParticleSystem subPS = subEmitters.GetSubEmitterSystem(i);
+                            if (subPS != null)
+                            {
+                                subPS.Play();
+                            }
+                        }
                     }
                 }
             }
@@ -289,9 +261,9 @@ namespace BrainNotBraining.Gameplay
         }
 
         /// <summary>
-        /// Light up a specific brain region with optional particles
+        /// Activates a specific brain region with optional particles
         /// </summary>
-        private IEnumerator LightUpRegion(BrainRegion region, bool useParticles)
+        private IEnumerator ActivateRegion(BrainRegion region, bool useParticles)
         {
             if (region == BrainRegion.None)
                 yield break;
@@ -306,24 +278,6 @@ namespace BrainNotBraining.Gameplay
             if (useParticles && regionParticles.ContainsKey(region) && regionParticles[region] != null)
             {
                 regionParticles[region].Play();
-            }
-
-            // Fade in the light
-            if (regionLights.ContainsKey(region) && regionLights[region] != null)
-            {
-                yield return StartCoroutine(FlickerLight(regionLights[region], lightActivationDuration, lightIntensity, 0.2f));
-                //Light light = regionLights[region];
-                //float elapsed = 0f;
-
-                //while (elapsed < lightActivationDuration)
-                //{
-                //    elapsed += Time.deltaTime;
-                //    float t = elapsed / lightActivationDuration;
-                //    light.intensity = Mathf.Lerp(0f, lightIntensity, t);
-                //    yield return null;
-                //}
-
-                //light.intensity = lightIntensity;
             }
         }
 
@@ -399,6 +353,15 @@ namespace BrainNotBraining.Gameplay
                 color.a = alpha;
                 brainMaterial.SetColor("_BaseColor", color);
             }
+        }
+
+        /// <summary>
+        /// Converts a BrainRegion enum to a user-friendly string.
+        /// </summary>
+        private string GetFriendlyRegionName(BrainRegion region)
+        {
+            // This will convert "MotorCortex" to "Motor Cortex"
+            return System.Text.RegularExpressions.Regex.Replace(region.ToString(), @"(?<=[a-z])(?=[A-Z])", " ");
         }
     }
 }
