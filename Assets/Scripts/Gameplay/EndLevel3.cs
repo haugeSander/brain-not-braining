@@ -1,41 +1,45 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Collections;
+using BrainNotBraining.Core;
 
 public class EndLevel3 : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
-    bool inBasket = false;
+    private const string BRAIN_REGION_SCENE = "BrainRegionUnlocked";
+    private bool inBasket = false;
+    private bool levelCompleted = false;
 
     void OnCollisionEnter(Collision collision)
     {
+        if (levelCompleted) return;
+
         Debug.Log("Entered collision with " + collision.gameObject.name);
         inBasket = true;
-        StartCoroutine("EndLevel");
+        StartCoroutine(EndLevelCoroutine());
     }
 
     void OnCollisionExit(Collision other)
     {
+        if (levelCompleted) return;
+
         Debug.Log("Player exited the basket area");
         inBasket = false;
-        StopCoroutine("EndLevel");
+        StopCoroutine(EndLevelCoroutine());
     }
 
-    void EndLevel()
+    IEnumerator EndLevelCoroutine()
     {
-        Debug.Log("Level Complete!");
-        // yield WaitForSeconds(3);
-        if (inBasket)
-            SceneManager.LoadScene("LevelFinished");
+        yield return new WaitForSeconds(0.5f); // Brief delay to ensure stable collision
+
+        if (inBasket && !levelCompleted)
+        {
+            levelCompleted = true;
+            Debug.Log("Level 3 completed! Loading brain region unlock scene...");
+
+            // Set which region should be unlocked (Level 3 unlocks Somatosensory)
+            ProgressionManager.PendingUnlock = BrainRegion.Somatosensory;
+
+            SceneManager.LoadScene(BRAIN_REGION_SCENE);
+        }
     }
 }

@@ -371,13 +371,22 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
+                },
+                {
+                    "name": "Pulse",
+                    "type": "Button",
+                    "id": "3f8e5c4a-9d2b-4e1c-8a7f-6b3e9c1d5f2a",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
                 {
                     "name": "WASD",
                     "id": "f72c67c9-ce27-4db8-b9b4-fa2b68b7adbc",
-                    "path": "2DVector",
+                    "path": "2DVector(mode=1)",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -437,6 +446,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Look",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7a2c5d8f-1b3e-4f9a-8c6d-2e4f7b9a1c3e",
+                    "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Pulse",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

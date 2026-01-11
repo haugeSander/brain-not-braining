@@ -9,7 +9,7 @@ public class PlayerLevelFourBehaviour : MonoBehaviour
 
 
     private float playerSpeed = 5.0f;
-    private float jumpHeight = 6.5f;
+    private float jumpHeight = 9.0f;
     private float gravityValue = -9.81f;
 
 
