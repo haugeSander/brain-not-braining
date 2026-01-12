@@ -30,9 +30,6 @@ public class EndLeve7 : MonoBehaviour
                 text.enabled = true;
             }
 
-            if (SoundManager.instance != null && DoorOpeningClip != null)
-                SoundManager.instance.PlaySound(DoorOpeningClip);
-
             StartCoroutine(EndLevel());
         }
     }
@@ -46,9 +43,6 @@ public class EndLeve7 : MonoBehaviour
     IEnumerator EndLevel()
     {
         Debug.Log("Level 7 (Prefrontal) completed! Loading brain region unlock scene...");
-
-        if (SoundManager.instance != null && DoorOpeningClip != null)
-            SoundManager.instance.PlaySound(DoorOpeningClip);
 
         yield return new WaitForSeconds(4);
 

@@ -7,8 +7,6 @@ public class PressurePlank : MonoBehaviour
 
     public Vector3 InitialPosition;
 
-    public SlidingDoorBehaviour slidingDoor;
-
     private void Start()
     {
         InitialPosition = transform.position;
@@ -25,14 +23,6 @@ public class PressurePlank : MonoBehaviour
     void OnCollisionEnter2D(Collision2D collision)
     {
         Debug.Log("Collision detected");
-        if (collision.gameObject.tag == "Player")
-        {
-
-            // collision.transform.parent = transform;
-            SoundManager.instance.PlaySound(HitClip);
-           
-            slidingDoor.SlideDoor();
-        }
     }
 
     void OnCollisionStay2D(Collision2D collision)

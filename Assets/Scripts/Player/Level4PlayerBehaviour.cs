@@ -61,12 +61,6 @@ public class Level4PlayerBehaviour : MonoBehaviour
 
 
         }
-
-        if (IsGrounded)
-        {
-            SoundManager.instance.PlaySound(StepsClip);
-        }
-
     }
 
     void OnJump()
@@ -76,7 +70,6 @@ public class Level4PlayerBehaviour : MonoBehaviour
         {
 
             Rigidbody.linearVelocity = new Vector2(Rigidbody.linearVelocity.x, JumpForce);
-            SoundManager.instance.PlaySound(JumpClip);
         }
     }
 
@@ -147,8 +140,6 @@ public class Level4PlayerBehaviour : MonoBehaviour
             BlockTaken.transform.localPosition = new Vector3(2.0f, 0, 0);
 
             isTakingABlock = true;
-            SoundManager.instance.PlaySound(InteractableBoxGrabClip);
-
         }
 
     }
@@ -201,7 +192,6 @@ public class Level4PlayerBehaviour : MonoBehaviour
             // 3. Cleaning the block taken
             BlockTaken = null;
             isTakingABlock = false;
-            SoundManager.instance.PlaySound(InteractableBoxGrabRelease);
         }
 
     }
