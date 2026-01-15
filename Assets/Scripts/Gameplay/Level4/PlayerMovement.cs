@@ -112,4 +112,9 @@ public class PlayerMovement : MonoBehaviour
         Vector3 flatVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
         return grounded && flatVel.magnitude > 0.1f;
     }
+
+    public Vector2 GetMoveInput()
+    {
+        return new Vector2(horizontalInput, verticalInput);
+    }
 }

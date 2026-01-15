@@ -39,8 +39,11 @@ public class PlayerAudioController : MonoBehaviour
     {
         if (movementAudio == null || movementAudio.clip == null) return;
 
-        // Check if the player is moving using the method on the PlayerMovement component
-        if (playerMovement.IsMoving())
+        // Check that the player is both moving AND still providing input.
+        // This prevents a final sound from playing while the player decelerates.
+        bool hasInput = playerMovement.GetMoveInput().sqrMagnitude > 0.01f;
+
+        if (playerMovement.IsMoving() && hasInput)
         {
             // Check if enough time has passed since the last footstep
             if (Time.time - lastFootstepTime >= footstepInterval)
