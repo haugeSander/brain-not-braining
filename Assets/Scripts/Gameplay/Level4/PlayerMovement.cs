@@ -81,7 +81,6 @@ public class PlayerMovement : MonoBehaviour
         else if (!grounded)
             rb.AddForce(moveDirection.normalized * moveSpeed * 10.0f * airMultiplier, ForceMode.Force);
         
-       
     }
 
 
@@ -105,5 +104,12 @@ public class PlayerMovement : MonoBehaviour
     private void ResetJump()
     {
         readyToJump = true;
+    }
+
+    public bool IsMoving()
+    {
+        // To be accessed by other scripts, e.g. an Echolocation controller
+        Vector3 flatVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+        return grounded && flatVel.magnitude > 0.1f;
     }
 }

@@ -7,6 +7,7 @@ using UnityEngine.Rendering;
 /// Note: This changes the PROJECT-LEVEL setting, not per-scene.
 /// Recommended approach: Manually toggle EdgeDetectionFeature on/off instead.
 /// </summary>
+/// DEPRECATED
 public class SwitchRenderPipeline : MonoBehaviour
 {
     [Header("Render Pipeline Override")]

@@ -13,12 +13,9 @@ public class CollapsingBox : MonoBehaviour
     [Tooltip("How long after collapsing the object should be destroyed. Set to 0 or less to disable.")]
     public float destroyDelay = 5.0f;
 
-    [Header("Sound Effects")]
-    [Tooltip("Sound to play when the player first touches the box.")]
-    public AudioClip crackingSound;
-
-    [Tooltip("Sound to play when the box is destroyed.")]
-    public AudioClip destroySound;
+    [Header("Sound Effect")]
+    [Tooltip("The single sound to play when the player first touches the box.")]
+    public AudioClip collapseSound;
 
     private Rigidbody rb;
     private bool isTriggered = false;
@@ -37,10 +34,10 @@ public class CollapsingBox : MonoBehaviour
         {
             isTriggered = true;
 
-            // Play cracking sound, if assigned
-            if (crackingSound != null)
+            // Play the collapse sound, if assigned
+            if (collapseSound != null)
             {
-                AudioSource.PlayClipAtPoint(crackingSound, transform.position);
+                AudioSource.PlayClipAtPoint(collapseSound, transform.position);
             }
 
             // Start the collapse sequence after a short delay
@@ -56,19 +53,13 @@ public class CollapsingBox : MonoBehaviour
         // Schedule the object's final destruction
         if (destroyDelay > 0)
         {
-            Invoke(nameof(PlayDestroySoundAndFinalize), destroyDelay);
+            Invoke(nameof(FinalizeDestruction), destroyDelay);
         }
     }
 
-    private void PlayDestroySoundAndFinalize()
+    private void FinalizeDestruction()
     {
-        // Play the destroy sound at the object's current position, if assigned
-        if (destroySound != null)
-        {
-            AudioSource.PlayClipAtPoint(destroySound, transform.position);
-        }
-
-        // Destroy the object immediately. The sound from PlayClipAtPoint will continue to play.
+        // The sound now plays on contact, so this method just destroys the object.
         Destroy(gameObject);
     }
 }
