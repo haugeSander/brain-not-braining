@@ -2,128 +2,139 @@ using UnityEngine;
 using UnityEngine.AI; // Required for NavMeshAgent
 
 /// <summary>
-/// The AI for the Phantom enemy. It remains idle and invisible until the player
-/// uses the special sight ability nearby, at which point it becomes visible and hostile.
+/// The AI for the Phantom enemy. It patrols a set route and remains invisible.
+/// When the player uses the special sight ability nearby, it becomes visible and hostile.
 /// </summary>
 [RequireComponent(typeof(NavMeshAgent), typeof(CapsuleCollider))]
 public class Phantom : MonoBehaviour
 {
-    public enum PhantomState { IDLE, ALERTED, ATTACKING }
+    public enum PhantomState { PATROLLING, ALERTED, ATTACKING }
 
     [Header("Behavior")]
     [Tooltip("The current state of the Phantom.")]
-    public PhantomState currentState = PhantomState.IDLE;
+    public PhantomState currentState = PhantomState.PATROLLING;
 
     [Tooltip("The distance at which the Phantom will detect the player's sight.")]
     public float sightTriggerDistance = 15f;
+
+    [Tooltip("A list of points for the Phantom to move between when not chasing the player.")]
+    public Transform[] patrolPoints;
 
     [Header("Components")]
     [Tooltip("The visual part of the phantom that will be enabled when alerted.")]
     public Renderer visuals;
 
+    [Header("Audio")]
+    [Tooltip("Sound to play when the phantom catches the player.")]
+    public AudioClip attackSound;
+    [Tooltip("Volume of the attack sound.")]
+    [Range(0f, 1f)]
+    public float attackSoundVolume = 1.0f;
+
     // Internal references
     private NavMeshAgent agent;
-    private PlayerSight playerSight; // Reference to the player's sight script
+    private PlayerSight playerSight;
+    private int currentPatrolIndex = 0;
+    private Animator animator;
 
     private void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
-
-        if (visuals == null)
-        {
-            Debug.LogError("Phantom: Visuals renderer is not assigned!", this);
-        }
+        // Get the animator from the main object or its children
+        animator = GetComponentInChildren<Animator>();
+        if (visuals == null) Debug.LogError("Phantom: Visuals renderer is not assigned!", this);
     }
 
     private void Start()
     {
-        // Find the player's sight component in the scene.
-        // This is simple, but for a larger game, a more robust manager/service locator might be better.
         playerSight = FindObjectOfType<PlayerSight>();
+        if (playerSight == null) Debug.LogError("Phantom: Could not find PlayerSight component in the scene!", this);
 
-        if (playerSight == null)
+        if (!agent.isOnNavMesh)
         {
-            Debug.LogError("Phantom: Could not find PlayerSight component in the scene!", this);
+            Debug.LogError($"Phantom '{name}' is not on a valid NavMesh! Please ensure its starting position is on a baked NavMesh.", this);
         }
 
-        // Start invisible and idle
-        visuals.enabled = false;
-        agent.enabled = false;
+        ChangeState(PhantomState.PATROLLING);
     }
 
     private void Update()
     {
-        // State machine logic
         switch (currentState)
         {
-            case PhantomState.IDLE:
-                UpdateIdle();
+            case PhantomState.PATROLLING:
+                UpdatePatrolling();
                 break;
             case PhantomState.ALERTED:
                 UpdateAlerted();
                 break;
             case PhantomState.ATTACKING:
-                UpdateAttacking();
+                // The attack logic is now handled once in ChangeState.
                 break;
         }
     }
 
-    private void UpdateIdle()
+    private void UpdatePatrolling()
     {
-        // If the player exists, is using their sight, and is within range...
         if (playerSight != null && playerSight.IsSeeing &&
             Vector3.Distance(transform.position, playerSight.transform.position) < sightTriggerDistance)
         {
-            // ...transition to the ALERTED state.
             ChangeState(PhantomState.ALERTED);
+            return;
         }
+
+        if (patrolPoints.Length == 0) return;
+
+        if (!agent.pathPending && agent.remainingDistance < 0.5f)
+        {
+            GotoNextPatrolPoint();
+        }
+    }
+
+    private void GotoNextPatrolPoint()
+    {
+        if (patrolPoints.Length == 0) return;
+        agent.destination = patrolPoints[currentPatrolIndex].position;
+        currentPatrolIndex = (currentPatrolIndex + 1) % patrolPoints.Length;
     }
 
     private void UpdateAlerted()
     {
-        // Chase the player
-        agent.SetDestination(playerSight.transform.position);
-
-        // Simple transition to ATTACKING state if close enough
-        if (agent.remainingDistance < agent.stoppingDistance)
+        if (agent.isOnNavMesh)
         {
-            ChangeState(PhantomState.ATTACKING);
-        }
-    }
-
-    private void UpdateAttacking()
-    {
-        // Placeholder for attack logic (e.g., deal damage to player)
-        Debug.Log("Phantom is attacking!");
-
-        // For now, just go back to chasing if the player moves away
-        if (agent.remainingDistance > agent.stoppingDistance)
-        {
-            ChangeState(PhantomState.ALERTED);
+            agent.SetDestination(playerSight.transform.position);
+            if (agent.remainingDistance < agent.stoppingDistance) ChangeState(PhantomState.ATTACKING);
         }
     }
 
     private void ChangeState(PhantomState newState)
     {
         if (currentState == newState) return;
-
         currentState = newState;
 
-        // Logic to run on entering a new state
         switch (currentState)
         {
-            case PhantomState.IDLE:
+            case PhantomState.PATROLLING:
                 visuals.enabled = false;
-                agent.enabled = false;
+                if(animator != null) animator.SetBool("isChasing", false);
+                if (agent.isOnNavMesh)
+                {
+                    agent.isStopped = false;
+                    GotoNextPatrolPoint();
+                }
                 break;
             case PhantomState.ALERTED:
                 Debug.Log("A Phantom has seen you!");
                 visuals.enabled = true;
-                agent.enabled = true;
-                // Could play a sound or particle effect here
+                if(animator != null) animator.SetBool("isChasing", true);
+                if (agent.isOnNavMesh) agent.isStopped = false;
                 break;
             case PhantomState.ATTACKING:
-                // Could play an attack animation/sound
+                Debug.Log("Phantom caught the player!");
+                if(animator != null) animator.SetTrigger("Attack");
+                if (attackSound != null) AudioSource.PlayClipAtPoint(attackSound, transform.position, attackSoundVolume);
+                if (agent.isOnNavMesh) agent.isStopped = true;
+                if (LevelManager.Instance != null) LevelManager.Instance.TriggerPlayerDeath();
                 break;
         }
     }

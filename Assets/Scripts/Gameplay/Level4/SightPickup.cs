@@ -14,8 +14,10 @@ public class SightPickup : MonoBehaviour
     [Tooltip("Effect to play when the pickup is collected.")]
     public GameObject collectionEffect;
 
-    // Reference to the level manager
-    private LevelManager levelManager;
+    [Tooltip("Sound to play when collected.")]
+    public AudioClip pickupSound;
+
+    private bool isCollected = false; // Safeguard flag
 
     private void Awake()
     {
@@ -23,35 +25,53 @@ public class SightPickup : MonoBehaviour
         GetComponent<Collider>().isTrigger = true;
     }
 
-    private void Start()
-    {
-        levelManager = FindObjectOfType<LevelManager>();
-    }
-
     private void OnTriggerEnter(Collider other)
     {
-        // Check if the object that entered the trigger has the PlayerSight component
-        PlayerSight playerSight = other.GetComponent<PlayerSight>();
+        // If already collected, do nothing.
+        if (isCollected) return;
 
-        if (playerSight != null)
+        // Check if the object that entered the trigger is tagged as "Player"
+        if (other.CompareTag("Player"))
         {
-            // If it's the player, increase their sight
-            playerSight.IncreaseMaxSight(sightIncreaseAmount);
-
-            // Notify the level manager
-            if (levelManager != null)
+            // GetComponentInParent is more robust, in case the collider is on a child object
+            PlayerSight playerSight = other.GetComponentInParent<PlayerSight>();
+            if (playerSight != null)
             {
-                levelManager.OnPickupCollected();
-            }
+                isCollected = true; // Set flag to prevent re-triggering
 
-            // Play a collection effect if one is assigned
-            if (collectionEffect != null)
-            {
-                Instantiate(collectionEffect, transform.position, Quaternion.identity);
-            }
+                // Disable the collider immediately to prevent re-triggers
+                GetComponent<Collider>().enabled = false;
 
-            // Remove the pickup from the scene
-            Destroy(gameObject);
+                // If it's the player, increase their sight
+                playerSight.IncreaseMaxSight(sightIncreaseAmount);
+
+                // Notify the level manager using the singleton instance
+                if (LevelManager.Instance != null)
+                {
+                    LevelManager.Instance.OnPickupCollected();
+                }
+
+                // Play a collection effect if one is assigned
+                if (collectionEffect != null)
+                {
+                    Instantiate(collectionEffect, transform.position, Quaternion.identity);
+                }
+
+                // Play the pickup sound using AudioSource.PlayClipAtPoint (doesn't require the object to exist)
+                if (pickupSound != null)
+                {
+                    AudioSource.PlayClipAtPoint(pickupSound, transform.position);
+                }
+
+                // Hide the visual immediately
+                if (GetComponent<Renderer>() != null)
+                {
+                    GetComponent<Renderer>().enabled = false;
+                }
+
+                // Remove the pickup from the scene
+                Destroy(gameObject);
+            }
         }
     }
 }

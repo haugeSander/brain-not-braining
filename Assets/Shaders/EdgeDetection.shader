@@ -3,7 +3,7 @@ Shader "Custom/EdgeDetection"
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
-        // _BlendAmount ("Blend Amount", Range(0, 1)) = 0.0
+        _BlendAmount ("Blend Amount", Range(0, 1)) = 0.0
         
         [Space]
         [Header(Brightness)]
