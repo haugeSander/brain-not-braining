@@ -48,9 +48,11 @@ public class SomatosensoryPuzzle : PuzzleBase
     private bool playerInGoal = false;
     private bool firstPulseTriggered = false;
 
+    private static readonly int BlendAmountID = Shader.PropertyToID("_BlendAmount");
+
     protected override void Start()
     {
-        base.Start();
+        Shader.SetGlobalFloat(BlendAmountID, 1f);
 
         // Find player if not assigned
         if (player == null)

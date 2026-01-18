@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEngine.AI; // Required for NavMeshAgent
+using UnityEngine.AI;
 
 /// <summary>
 /// The AI for the Phantom enemy. It patrols a set route and remains invisible.
@@ -14,7 +14,9 @@ public class Phantom : MonoBehaviour
     [Tooltip("The current state of the Phantom.")]
     public PhantomState currentState = PhantomState.PATROLLING;
     [Tooltip("The distance at which the Phantom will detect the player's sight.")]
-    public float sightTriggerDistance = 15f;
+    public float sightTriggerDistance = 25f;
+    [Tooltip("Distance at which the phantom attacks the player.")]
+    public float attackDistance = 2f;
     [Tooltip("A list of points for the Phantom to move between when not chasing the player.")]
     public Transform[] patrolPoints;
 
@@ -118,10 +120,22 @@ public class Phantom : MonoBehaviour
 
     private void UpdateAlerted()
     {
-        if (agent.isOnNavMesh)
+        if (!agent.isOnNavMesh || playerSight == null) return;
+
+        // Set destination to player
+        agent.SetDestination(playerSight.transform.position);
+
+        // CRITICAL FIX: Use actual world distance instead of remainingDistance
+        // remainingDistance can be unreliable in builds, especially with invalid paths
+        float distanceToPlayer = Vector3.Distance(transform.position, playerSight.transform.position);
+        
+        // Also check if the path is valid and complete
+        bool hasValidPath = agent.hasPath && agent.pathStatus == NavMeshPathStatus.PathComplete;
+        
+        // Only attack if physically close AND path is valid
+        if (distanceToPlayer < attackDistance && hasValidPath)
         {
-            agent.SetDestination(playerSight.transform.position);
-            if (agent.remainingDistance < agent.stoppingDistance) ChangeState(PhantomState.ATTACKING);
+            ChangeState(PhantomState.ATTACKING);
         }
     }
 
