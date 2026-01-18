@@ -138,6 +138,9 @@ public class EdgeDetectionFeature : ScriptableRendererFeature
 
             CommandBuffer cmd = CommandBufferPool.Get("EdgeDetection");
 
+            // Sync the material's blend amount with the global property set by VisionBlinker.cs
+            settings.edgeDetectionMaterial.SetFloat(Shader.PropertyToID("_BlendAmount"), Shader.GetGlobalFloat(Shader.PropertyToID("_BlendAmount")));
+
             // Set shader properties
             settings.edgeDetectionMaterial.SetFloat(EdgeThresholdID, settings.edgeThreshold);
             settings.edgeDetectionMaterial.SetColor(EdgeColorID, settings.edgeColor);

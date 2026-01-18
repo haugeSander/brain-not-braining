@@ -462,7 +462,7 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
                     ""name"": ""Pulse"",
                     ""type"": ""Button"",
                     ""id"": ""3f8e5c4a-9d2b-4e1c-8a7f-6b3e9c1d5f2a"",
-                    ""expectedControlType"": ""Button"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false

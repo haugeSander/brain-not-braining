@@ -3,6 +3,13 @@ Shader "Custom/EdgeDetection"
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
+        _BlendAmount ("Blend Amount", Range(0, 1)) = 0.0
+        
+        [Space]
+        [Header(Brightness)]
+        [Toggle] _UseDynamicBrightness ("Use Dynamic Brightness (Pulse/Proximity)?", Float) = 0
+        [Space]
+
         _EdgeThreshold ("Edge Threshold", Range(0, 1)) = 0.1
         _EdgeColor ("Edge Color", Color) = (1,1,1,1)
         _BackgroundColor ("Background Color", Color) = (0,0,0,1)
@@ -40,6 +47,8 @@ Shader "Custom/EdgeDetection"
             TEXTURE2D(_MainTex);
             SAMPLER(sampler_MainTex);
 
+            float _BlendAmount;
+            float _UseDynamicBrightness;
             float _EdgeThreshold;
             float4 _EdgeColor;
             float4 _BackgroundColor;
@@ -164,16 +173,30 @@ Shader "Custom/EdgeDetection"
                     }
                 }
 
-                // Combine proximity + pulse brightness (additive, then clamp)
-                float finalBrightness = saturate(proximityBrightness + pulseBrightness);
+                // Conditionally calculate brightness
+                float finalBrightness;
+                if (_UseDynamicBrightness > 0.5)
+                {
+                    // Use the original dynamic calculation for pulse and proximity
+                    finalBrightness = saturate(proximityBrightness + pulseBrightness);
+                }
+                else
+                {
+                    // Use constant full brightness
+                    finalBrightness = 1.0f;
+                }
 
                 // Apply brightness to edge color
                 half4 finalEdgeColor = _EdgeColor * finalBrightness;
 
                 // Output: modulated edges on black background
-                half4 color = lerp(_BackgroundColor, finalEdgeColor, edge);
+                half4 sobelColor = lerp(_BackgroundColor, finalEdgeColor, edge);
 
-                return color;
+                // Get original scene color from the texture provided by the Blit pass
+                half4 originalSceneColor = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv);
+
+                // Blend between original scene and sobel view based on _BlendAmount
+                return lerp(originalSceneColor, sobelColor, _BlendAmount);
             }
             ENDHLSL
         }

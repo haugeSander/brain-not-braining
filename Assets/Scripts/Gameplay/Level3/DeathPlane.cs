@@ -5,17 +5,13 @@ using BrainNotBraining.Core;
 namespace BrainNotBraining.Gameplay
 {
     /// <summary>
-    /// Detects when the player falls into the void (out of bounds) and resets the level.
-    /// Positioned below the playable area as a large trigger collider.
-    /// On player trigger enter, reloads the current scene to restart the level.
+    /// Detects when the player enters a lethal area and triggers the death sequence.
+    /// In Level 4, this calls the LevelManager to show the death screen.
+    /// In other levels, it can fall back to reloading the scene.
     /// </summary>
     public class DeathPlane : MonoBehaviour
     {
         [Header("Death Plane Configuration")]
-        [Tooltip("Delay before reloading scene (seconds) - allows for death animation/sound")]
-        [Range(0f, 10f)]
-        public float reloadDelay = 3.0f;
-
         [Tooltip("Play audio on death (optional)")]
         public AudioClip deathSound;
 
@@ -26,8 +22,7 @@ namespace BrainNotBraining.Gameplay
         [Tooltip("Enable debug logging")]
         public bool debugMode = false;
 
-        // Internal state
-        private bool isReloading = false;
+        private bool playerIsDead = false;
 
         private void Awake()
         {
@@ -46,27 +41,22 @@ namespace BrainNotBraining.Gameplay
 
         private void OnTriggerEnter(Collider other)
         {
-            // Prevent multiple reload triggers
-            if (isReloading)
-            {
-                return;
-            }
+            if (playerIsDead) return;
 
-            // Check if player fell into void
             if (other.CompareTag("Player"))
             {
                 if (debugMode)
                 {
-                    Debug.Log($"DeathPlane: Player fell into void at position {other.transform.position}");
+                    Debug.Log($"DeathPlane: Player entered death trigger at position {other.transform.position}");
                 }
 
-                isReloading = true;
+                playerIsDead = true;
                 OnPlayerDeath();
             }
         }
 
         /// <summary>
-        /// Called when player falls into void. Triggers death sequence.
+        /// Called when player enters the death trigger.
         /// </summary>
         private void OnPlayerDeath()
         {
@@ -74,56 +64,19 @@ namespace BrainNotBraining.Gameplay
             if (deathSound != null)
             {
                 AudioSource.PlayClipAtPoint(deathSound, transform.position, deathSoundVolume);
-
-                if (debugMode)
-                {
-                    Debug.Log($"DeathPlane: Playing death sound");
-                }
             }
 
-            // Reload level after delay
-            if (reloadDelay > 0f)
+            // Use the LevelManager if it exists (for Level 4's death screen)
+            if (LevelManager.Instance != null)
             {
-                Invoke(nameof(ReloadLevel), reloadDelay);
+                LevelManager.Instance.TriggerPlayerDeath();
             }
             else
             {
-                ReloadLevel();
+                // Fallback for other scenes that might not have a LevelManager
+                Debug.LogWarning("DeathPlane: LevelManager not found. Reloading scene as a fallback.");
+                SceneManager.LoadScene(SceneManager.GetActiveScene().name);
             }
-        }
-
-        /// <summary>
-        /// Reloads the current scene to restart the level.
-        /// </summary>
-        private void ReloadLevel()
-        {
-            string currentSceneName = SceneManager.GetActiveScene().name;
-
-            if (debugMode)
-            {
-                Debug.Log($"DeathPlane: Reloading scene '{currentSceneName}'");
-            }
-
-            // Option 1: Use GameManager if available (preserves progression state)
-            if (GameManager.Instance != null)
-            {
-                GameManager.Instance.LoadLevel(currentSceneName);
-            }
-            else
-            {
-                // Option 2: Direct scene reload (fallback)
-                SceneManager.LoadScene(currentSceneName);
-            }
-        }
-
-        /// <summary>
-        /// Manual reset method for testing in editor.
-        /// </summary>
-        [ContextMenu("Test Death Plane")]
-        public void TestDeathPlane()
-        {
-            Debug.Log("DeathPlane: Testing death plane trigger (manual)");
-            OnPlayerDeath();
         }
 
 #if UNITY_EDITOR
@@ -147,9 +100,6 @@ namespace BrainNotBraining.Gameplay
                     Gizmos.DrawSphere(sphereCol.center, sphereCol.radius);
                 }
             }
-
-            // Draw label
-            UnityEditor.Handles.Label(transform.position, "DEATH PLANE");
         }
 #endif
     }

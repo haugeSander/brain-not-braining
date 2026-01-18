@@ -9,6 +9,8 @@ namespace BrainNotBraining.Gameplay
     /// </summary>
     public abstract class PuzzleBase : MonoBehaviour
     {
+        private static readonly int BlendAmountID = Shader.PropertyToID("_BlendAmount");
+        
         // === PUZZLE STATE ===
         [Header("Puzzle State")]
         [Tooltip("Is this puzzle currently solved?")]
@@ -27,6 +29,7 @@ namespace BrainNotBraining.Gameplay
         {
             // Initialize puzzle-specific logic
             // Override this in child classes if needed
+            Shader.SetGlobalFloat(BlendAmountID, 0f);
         }
 
         // === PUBLIC API ===

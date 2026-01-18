@@ -105,9 +105,7 @@ public class PlayerLevelSevenBehaviour : MonoBehaviour
             BlockTaken.transform.localPosition = new Vector3(0.0f, 1.0f, 1.5f);
 
             isTakingABlock = true;
-            // SoundManager.instance.PlaySound(InteractableBoxGrabClip);
             BlockTaken.centerOfMass = Vector3.zero;
-            SoundManager.instance.PlaySound(BoxPickupClip);
         }
 
     }
@@ -167,7 +165,6 @@ public class PlayerLevelSevenBehaviour : MonoBehaviour
 
             BlockTaken = null;
             isTakingABlock = false;
-             SoundManager.instance.PlaySound(BoxReleaseClip);
         }
 
     }
