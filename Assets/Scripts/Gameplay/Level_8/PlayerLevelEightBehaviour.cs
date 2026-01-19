@@ -3,10 +3,11 @@ using Unity.Burst.CompilerServices;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PlayerLevelSevenBehaviour : MonoBehaviour
+public class PlayerLevelEightBehaviour : MonoBehaviour
 {
 
     BoxCollider PlayerBoxCollider;
+    public TextMeshProUGUI HintText;
 
 
 
@@ -22,16 +23,64 @@ public class PlayerLevelSevenBehaviour : MonoBehaviour
 
     public AudioClip BoxPickupClip;
     public AudioClip BoxReleaseClip;
+    public AudioClip Footsteps;
+    public AudioClip FastFootSteps;
+    AudioSource AudioSource;
+
+
+    float speed = 0;
+
+    Vector3 lastPosition = Vector3.zero;
     public void Start()
     {
         PlayerBoxCollider = GetComponent<BoxCollider>();
 
-
+        AudioSource = GetComponent<AudioSource>();
 
     }
 
     public void Update()
     {
+
+    }
+    void FixedUpdate()
+    {
+        speed = (transform.position - lastPosition).magnitude;
+        lastPosition = transform.position;
+        speed *= 100;
+        if (speed > 1.0f && speed < 8.0f)
+        {
+            if (!AudioSource.isPlaying)
+            {
+                AudioSource.clip = Footsteps;
+                AudioSource.Play();
+            }
+        }
+        else if (speed >= 8.0f)
+        {
+
+        // Debug.Log($"Speed:{speed}");
+            if (AudioSource.isPlaying && AudioSource.clip!=FastFootSteps)
+            {
+                AudioSource.Stop();
+
+            }
+            
+            if (!AudioSource.isPlaying)
+            {
+                AudioSource.clip = FastFootSteps;
+                AudioSource.Play();
+            }
+            
+
+        }
+        else
+        {
+            if (AudioSource.isPlaying)
+            {
+                AudioSource.Stop();
+            }
+        }
 
     }
 
@@ -58,12 +107,16 @@ public class PlayerLevelSevenBehaviour : MonoBehaviour
     void PushDemolitionBall()
     {
         GameObject DemolitionBall = FindClosestObjectByTag("DemolitionBall");
-        Rigidbody rigidbody = DemolitionBall.GetComponent<Rigidbody>();
-        if (rigidbody != null && !rigidbody.isKinematic)
+        if (DemolitionBall != null)
         {
-            Vector3 pushDir = new Vector3(1, 0, 0);
-            rigidbody.linearVelocity = pushDir * 5.0f; // Applica una spinta
+            Rigidbody rigidbody = DemolitionBall.GetComponent<Rigidbody>();
+            if (rigidbody != null && !rigidbody.isKinematic)
+            {
+                Vector3 pushDir = new Vector3(1, 0, 0);
+                rigidbody.linearVelocity = pushDir * 5.0f; // Applica una spinta
+            }
         }
+
     }
 
     // private void OnControllerColliderHit(ControllerColliderHit hit)
@@ -84,6 +137,7 @@ public class PlayerLevelSevenBehaviour : MonoBehaviour
     //         // }
     //     }
     // }
+
 
     void GrabBlock()
     {
@@ -108,9 +162,12 @@ public class PlayerLevelSevenBehaviour : MonoBehaviour
             // SoundManager.instance.PlaySound(InteractableBoxGrabClip);
             BlockTaken.centerOfMass = Vector3.zero;
             SoundManager.instance.PlaySound(BoxPickupClip);
+            HintText.text = "Press F to release";
+            HintText.enabled = true;
         }
 
     }
+
 
     GameObject FindClosestObjectByTag(string type)
     {
@@ -122,7 +179,7 @@ public class PlayerLevelSevenBehaviour : MonoBehaviour
         float distance = Mathf.Infinity;
         Vector3 position = transform.position;
         Transform target;
-        float GrabbingDistance = 7.5f;
+        float GrabbingDistance = 2.0f;
 
         // Iterate through them and find the closest one
 
@@ -167,56 +224,81 @@ public class PlayerLevelSevenBehaviour : MonoBehaviour
 
             BlockTaken = null;
             isTakingABlock = false;
-             SoundManager.instance.PlaySound(BoxReleaseClip);
+            SoundManager.instance.PlaySound(BoxReleaseClip);
         }
 
     }
 
     void OnCollisionEnter(Collision collision)
     {
-        Debug.Log("Collision Detected " + collision.gameObject);
-        if (collision.gameObject.tag == "Door")
-        {
-            HasTouchedADoor = true;
-        }
+        // Debug.Log("Collision Detected " + collision.gameObject);
+        // if (collision.gameObject.tag == "Door")
+        // {
+        //     HasTouchedADoor = true;
+        // }
 
-        if (collision.gameObject.tag == "Interactable")
-        {
-            HasTouchedAnInteractable = true;
-        }
+        // if (collision.gameObject.tag == "Interactable")
+        // {
+        //     HasTouchedAnInteractable = true;
+        // }
 
-        if (collision.gameObject.tag == "DemolitionBall")
-        {
-            HasTouchedDemolitionBall = true;
-        }
+        // if (collision.gameObject.tag == "DemolitionBall")
+        // {
+        //     HasTouchedDemolitionBall = true;
+        // }
 
 
     }
 
-    // void OnTriggerEnter(Collider other)
-    // {
-    //      if (other.gameObject.tag == "Checkpoint")
-    //     {
-    //         HintText.text="Turn Left";
-    //         HintText.enabled= true;
+    void OnTriggerEnter(Collider other)
+    {
+        Debug.Log("Collision Detected " + other.gameObject);
+        if (other.gameObject.tag == "Interactable" && !isTakingABlock)
+        {
+            HintText.text = "Press F to Interact";
+            HintText.enabled = true;
+        }
+        else if (other.gameObject.tag == "DemolitionBall")
+        {
+            HintText.text = "Press F to Push";
+            HasTouchedDemolitionBall = true;
+            HintText.enabled = true;
+        }
+        else
+        {
 
-    //     }        
-    // }
+        }
+    }
+
+    void OnTriggerStay(Collider other)
+    {
+
+    }
+
+    void OnTriggerExit(Collider other)
+    {
+        if (!isTakingABlock)
+        {
+
+            HintText.enabled = false;
+            HasTouchedDemolitionBall = false;
+        }
+    }
 
     void OnCollisionExit(Collision collision)
     {
-        if (collision.gameObject.tag == "Door")
-        {
-            HasTouchedADoor = false;
-        }
+        // if (collision.gameObject.tag == "Door")
+        // {
+        //     HasTouchedADoor = false;
+        // }
 
-        if (collision.gameObject.tag == "Interactable")
-        {
-            HasTouchedAnInteractable = false;
-        }
-        if (collision.gameObject.tag == "DemolitionBall")
-        {
-            HasTouchedDemolitionBall = false;
-        }
+        // if (collision.gameObject.tag == "Interactable")
+        // {
+        //     HasTouchedAnInteractable = false;
+        // }
+        // if (collision.gameObject.tag == "DemolitionBall")
+        // {
+        //     HasTouchedDemolitionBall = false;
+        // }
     }
 }

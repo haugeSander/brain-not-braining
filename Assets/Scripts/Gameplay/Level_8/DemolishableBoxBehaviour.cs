@@ -1,7 +1,7 @@
 using TMPro;
 using UnityEngine;
 
-public class InteractableBehaviour : MonoBehaviour
+public class DemolishableBoxBehaviour : MonoBehaviour
 {
     public TextMeshProUGUI HintText;
     Rigidbody rigidbody;
@@ -21,10 +21,6 @@ public class InteractableBehaviour : MonoBehaviour
     {
    
 
-        if (collision.gameObject.tag == "Ground" || collision.gameObject.tag == "Interactable")
-        {
-            rigidbody.isKinematic=true;
-        }
 
         if (collision.gameObject.tag == "DemolitionBall")
         {
