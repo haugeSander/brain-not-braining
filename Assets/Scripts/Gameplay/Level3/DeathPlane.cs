@@ -63,7 +63,7 @@ namespace BrainNotBraining.Gameplay
             // Play death sound if assigned
             if (deathSound != null)
             {
-                AudioSource.PlayClipAtPoint(deathSound, transform.position, deathSoundVolume);
+                AudioHelper.PlaySFX(deathSound, transform.position, deathSoundVolume);
             }
 
             // Use the LevelManager if it exists (for Level 4's death screen)
