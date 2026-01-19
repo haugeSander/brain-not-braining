@@ -21,7 +21,8 @@ namespace BrainNotBraining.Core
             LOADING,       // Loading between levels or similar
             PAUSED,        // Game paused
             OPTIONS,        // In the options menu
-            LEVELCOMPLETE  // Level finished, transitioning
+            LEVELCOMPLETE, // Level finished, transitioning
+            GAMEOVER       // Player failed the level
         }
 
         private GameState _currentState;
@@ -89,6 +90,17 @@ namespace BrainNotBraining.Core
             _currentState = GameState.LEVELCOMPLETE;
             ProgressionManager.Instance.UnlockRegion(BrainRegion.Brainstem);
             Debug.Log("Level complete!");
+        }
+
+        /// <summary>
+        /// Called when a level is failed. Sets game over state.
+        /// </summary>
+        public void OnLevelFailed()
+        {
+            _currentState = GameState.GAMEOVER;
+            // Don't pause Time.timeScale here - let the puzzle handle it
+            // (allows animations and audio fades to continue)
+            Debug.Log("Level failed - Game Over state active");
         }
 
         /// <summary>
