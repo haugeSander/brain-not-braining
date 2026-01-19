@@ -927,4 +927,28 @@ public class ReflexBreathPuzzle : PuzzleBase
     {
         // Not needed for this puzzle (handled in Update)
     }
+
+    private void OnDestroy()
+    {
+        StopAllCoroutines();
+
+        foreach (var button in activeButtons)
+        {
+            if (button != null) Destroy(button);
+        }
+        activeButtons.Clear();
+
+        if (screenFlash != null)
+        {
+            screenFlash.ClearScreen();
+            screenFlash.StopFadeToBlack();
+        }
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.StopAllGameplayAudioImmediate();
+        }
+
+        Debug.Log("ReflexBreathPuzzle destroyed cleanly");
+    }
 }

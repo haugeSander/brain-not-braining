@@ -73,7 +73,6 @@ namespace BrainNotBraining.Core
                 return;
             }
             Instance = this;
-            DontDestroyOnLoad(gameObject);
         }
 
         private void Start()
@@ -286,7 +285,7 @@ namespace BrainNotBraining.Core
         {
             // TODO (Level 2): Start playing ambient sounds
         }
-        
+
         public void EnableMusic()
         {
             // Music must be assigned to musicSource.clip in Inspector
@@ -554,5 +553,53 @@ namespace BrainNotBraining.Core
 
             Debug.Log("AudioManager: Audio restored to default volumes");
         }
+
+        public void StopAllGameplayAudioImmediate()
+        {
+            StopAllCoroutines();
+
+            if (musicSource != null)
+            {
+                musicSource.Stop();
+                musicSource.clip = null;
+                musicSource.volume = 0f;
+            }
+
+            if (heartbeatSource != null)
+            {
+                heartbeatSource.Stop();
+                heartbeatSource.volume = 0f;
+                heartbeatSource.pitch = 1f;
+            }
+
+            if (footstepsSource != null)
+            {
+                footstepsSource.Stop();
+                footstepsSource.volume = 0f;
+            }
+
+            if (ambientSource != null)
+            {
+                ambientSource.Stop();
+                ambientSource.volume = 0f;
+            }
+
+            if (sfxSource != null)
+            {
+                sfxSource.Stop();
+            }
+
+            // Kill filters
+            if (musicLowPass != null) Destroy(musicLowPass);
+            if (heartbeatLowPass != null) Destroy(heartbeatLowPass);
+
+            musicLowPass = null;
+            heartbeatLowPass = null;
+            isMuffling = false;
+            muffleProgress = 0f;
+
+            Debug.Log("AudioManager: HARD audio stop complete");
+        }
+
     }
 }
