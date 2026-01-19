@@ -10,11 +10,14 @@ public class GameTimer : MonoBehaviour
     public GameObject restartButton; // drag your restart button here
     public TMP_Text startText;  
 
+    public TMP_Text timeRunsOutText;
+
     private bool gameRunning = false;
 
     void Start()
     {
         restartButton.SetActive(false);  
+        timeRunsOutText.gameObject.SetActive(false);
         startText.gameObject.SetActive(true);  // show start text
         timerText.text = Mathf.Ceil(timeLeft).ToString();
         Cursor.lockState = CursorLockMode.None;
@@ -60,6 +63,7 @@ public class GameTimer : MonoBehaviour
     void EndGame()
     {
         gameRunning = false;
+        timeRunsOutText.gameObject.SetActive(true);
         restartButton.SetActive(true);
         timerText.text = "Game Over!";
         Time.timeScale = 0f;              // pause the game
