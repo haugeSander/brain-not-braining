@@ -24,6 +24,7 @@ public class PlayerLevelEightBehaviour : MonoBehaviour
     public AudioClip BoxPickupClip;
     public AudioClip BoxReleaseClip;
     public AudioClip Footsteps;
+    public AudioClip JumpSound;
     public AudioClip FastFootSteps;
     AudioSource AudioSource;
 
@@ -82,6 +83,11 @@ public class PlayerLevelEightBehaviour : MonoBehaviour
             }
         }
 
+    }
+
+    void OnJump()
+    {
+        AudioSource.PlayOneShot(JumpSound);
     }
 
     void OnUse()
