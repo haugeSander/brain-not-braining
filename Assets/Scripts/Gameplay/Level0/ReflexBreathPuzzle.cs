@@ -920,6 +920,8 @@ public class ReflexBreathPuzzle : PuzzleBase
         }
 
         // Step 3: Load the brain visualization scene
+        Debug.Log("Unlocking: Brainstem pending unlocked...");
+        ProgressionManager.PendingUnlock = BrainRegion.Brainstem;
         UnityEngine.SceneManagement.SceneManager.LoadScene(brainVisualizationScene);
     }
 

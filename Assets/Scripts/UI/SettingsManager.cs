@@ -50,7 +50,7 @@ public class SettingsManager : MonoBehaviour
     // Public property for other scripts to access sensitivity
     public static float MouseSensitivity { get; private set; } = 2.0f;
     public static bool InvertY { get; private set; } = false;
-    public static bool CheatsEnabled { get; private set; } = false;
+    public static bool CheatsEnabled { get; private set; } = true;
 
     private void Start()
     {

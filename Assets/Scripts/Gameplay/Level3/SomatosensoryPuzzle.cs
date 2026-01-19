@@ -135,33 +135,19 @@ public class SomatosensoryPuzzle : PuzzleBase
 
         Debug.Log("Teleporting player...");
 
-        // Get the CharacterController component
-        CharacterController controller = GetComponent<CharacterController>();
-
-        if (controller != null)
+        // If using Rigidbody instead
+        Rigidbody rb = player.GetComponent<Rigidbody>();
+        if (rb != null)
         {
-            // For CharacterController, you must disable it first, then move, then re-enable
-            controller.enabled = false;
-            transform.position = teleportLocation.transform.position;
-            transform.rotation = teleportLocation.transform.rotation; // Optional: match rotation too
-            controller.enabled = true;
+            rb.position = teleportLocation.transform.position;
+            rb.rotation = teleportLocation.transform.rotation;
+            rb.linearVelocity = Vector3.zero; // Reset velocity
         }
         else
         {
-            // If using Rigidbody instead
-            Rigidbody rb = GetComponent<Rigidbody>();
-            if (rb != null)
-            {
-                rb.position = teleportLocation.transform.position;
-                rb.rotation = teleportLocation.transform.rotation;
-                rb.linearVelocity = Vector3.zero; // Reset velocity
-            }
-            else
-            {
-                // Fallback: just move the transform
-                transform.position = teleportLocation.transform.position;
-                transform.rotation = teleportLocation.transform.rotation;
-            }
+            // Fallback: just move the transform
+            transform.position = teleportLocation.transform.position;
+            transform.rotation = teleportLocation.transform.rotation;
         }
     }
 

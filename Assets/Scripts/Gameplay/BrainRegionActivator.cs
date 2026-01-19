@@ -55,7 +55,7 @@ namespace BrainNotBraining.Gameplay
         private static readonly int BlendAmountID = Shader.PropertyToID("_BlendAmount");
 
         private void Awake()
-        {
+        {            
             regionParticles[BrainRegion.Brainstem] = brainstemParticles;
             regionParticles[BrainRegion.MotorCortex] = motorCortexParticles;
             regionParticles[BrainRegion.Somatosensory] = somatosensoryParticles;
