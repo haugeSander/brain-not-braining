@@ -3,6 +3,7 @@ using UnityEngine.Rendering;
 using System.Collections;
 using BrainNotBraining.Core;
 using BrainNotBraining.Gameplay;
+using UnityEngine.Audio;
 
 /// <summary>
 /// Represents a warm or cool temperature zone in Level 3.
@@ -30,6 +31,10 @@ public class TemperatureZone : MonoBehaviour
     [Tooltip("Movement speed reduction percentage (0.5 = 50% slower)")]
     [Range(0.1f, 0.9f)]
     public float coldSlowdownPercent = 0.5f;
+
+    [Header("Audio Mixer Groups")]
+    [Tooltip("Assign your mixer groups for proper volume control")]
+    public AudioMixerGroup sfxMixerGroup;
 
     [Header("Audio Configuration")]
     [Tooltip("Audio clip for this zone (hum for warm, ambient for cool)")]
@@ -109,6 +114,7 @@ public class TemperatureZone : MonoBehaviour
         audioSource.spatialBlend = spatialBlend; // Use configured spatial blend
         audioSource.volume = 0f;
         audioSource.pitch = audioPitch;
+        audioSource.outputAudioMixerGroup = sfxMixerGroup;
     }
 
     private void Update()

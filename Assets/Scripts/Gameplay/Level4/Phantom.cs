@@ -164,7 +164,7 @@ public class Phantom : MonoBehaviour
             case PhantomState.ATTACKING:
                 Debug.Log("Phantom caught the player!");
                 if(animator != null) animator.SetTrigger("Attack");
-                if (attackSound != null) AudioSource.PlayClipAtPoint(attackSound, transform.position, attackSoundVolume);
+                if (attackSound != null) AudioHelper.PlaySFX(attackSound, transform.position, attackSoundVolume);
                 if (agent.isOnNavMesh) agent.isStopped = true;
                 if (LevelManager.Instance != null) LevelManager.Instance.TriggerPlayerDeath();
                 break;

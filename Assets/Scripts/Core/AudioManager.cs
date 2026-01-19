@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Audio;
 
 namespace BrainNotBraining.Core
 {
@@ -11,6 +12,11 @@ namespace BrainNotBraining.Core
     {
         // === SINGLETON PATTERN ===
         public static AudioManager Instance { get; private set; }
+
+        [Header("Audio Mixer Groups")]
+        [Tooltip("Assign your mixer groups for proper volume control")]
+        public AudioMixerGroup musicMixerGroup;
+        public AudioMixerGroup sfxMixerGroup;
 
         // === AUDIO SOURCES ===
         [Header("Audio Sources")]
@@ -126,6 +132,7 @@ namespace BrainNotBraining.Core
             heartbeatSource.loop = true;
             heartbeatSource.playOnAwake = false;
             heartbeatSource.volume = 0.4f; // Lowered from 0.7f
+            heartbeatSource.outputAudioMixerGroup = sfxMixerGroup;
 
             if (footstepsSource == null)
             {
@@ -135,6 +142,7 @@ namespace BrainNotBraining.Core
             footstepsSource.loop = false;
             footstepsSource.playOnAwake = false;
             footstepsSource.volume = 0.0f;
+            heartbeatSource.outputAudioMixerGroup = sfxMixerGroup;
 
             if (ambientSource == null)
             {
@@ -144,6 +152,7 @@ namespace BrainNotBraining.Core
             ambientSource.loop = false;
             ambientSource.playOnAwake = false;
             ambientSource.volume = 0.0f;
+            heartbeatSource.outputAudioMixerGroup = sfxMixerGroup;
 
             if (musicSource == null)
             {
@@ -153,6 +162,7 @@ namespace BrainNotBraining.Core
             musicSource.loop = false;
             musicSource.playOnAwake = false;
             musicSource.volume = 0.0f;
+            musicSource.outputAudioMixerGroup = musicMixerGroup;
 
             if (sfxSource == null)
             {
@@ -162,6 +172,7 @@ namespace BrainNotBraining.Core
             sfxSource.loop = false;
             sfxSource.playOnAwake = false;
             sfxSource.volume = 1.0f;
+            sfxSource.outputAudioMixerGroup = sfxMixerGroup;
 
             audioSourcesInitialized = true;
             Debug.Log("AudioManager initialized");

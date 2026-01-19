@@ -30,9 +30,9 @@ public class LevelManager : MonoBehaviour
     public PlayerMovement playerMovement;
     public ScreenFlash screenFlash;
 
-    [Header("Debug")]
+    [Header("Cheat")]
     [Tooltip("Press this key to simulate collecting a pickup.")]
-    public KeyCode debugAddPickupKey = KeyCode.F;
+    public KeyCode cheatAddPickupKey = KeyCode.F;
 
     // Internal state
     private int pickupsCollected = 0;
@@ -73,7 +73,7 @@ public class LevelManager : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(debugAddPickupKey))
+        if (Input.GetKeyDown(cheatAddPickupKey))
         {
             Debug.Log("DEBUG: Manually collecting one pickup.");
             OnPickupCollected();

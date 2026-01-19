@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.Audio;
 
 /// <summary>
 /// Manages game settings including audio, graphics, and controls.
@@ -8,6 +9,8 @@ using TMPro;
 /// </summary>
 public class SettingsManager : MonoBehaviour
 {
+    [Header("Audio Mixer")]
+    [SerializeField] private AudioMixer audioMixer;
     [Header("Audio Settings")]
     [SerializeField] private Slider masterVolumeSlider;
     [SerializeField] private Slider musicVolumeSlider;
@@ -21,6 +24,11 @@ public class SettingsManager : MonoBehaviour
     [Header("Gameplay Settings")]
     [SerializeField] private Slider mouseSensitivitySlider;
     [SerializeField] private Toggle invertYToggle;
+
+    [Header("Developer Settings")]
+    [SerializeField] private Toggle cheatsToggle;
+    [Tooltip("If true, cheats section is visible in settings. Set to false for release builds.")]
+    public bool showCheatsInSettings = true;
 
     [Header("UI References (Optional)")]
     [SerializeField] private TextMeshProUGUI masterVolumeText;
@@ -37,15 +45,23 @@ public class SettingsManager : MonoBehaviour
     private const string FULLSCREEN_KEY = "Fullscreen";
     private const string SENSITIVITY_KEY = "MouseSensitivity";
     private const string INVERT_Y_KEY = "InvertY";
+    private const string CHEATS_KEY = "CheatsEnabled";
 
     // Public property for other scripts to access sensitivity
     public static float MouseSensitivity { get; private set; } = 2.0f;
     public static bool InvertY { get; private set; } = false;
+    public static bool CheatsEnabled { get; private set; } = false;
 
     private void Start()
     {
         LoadSettings();
         SetupListeners();
+        
+        // Hide cheats toggle if showCheatsInSettings is false
+        if (cheatsToggle != null && !showCheatsInSettings)
+        {
+            cheatsToggle.transform.parent.gameObject.SetActive(false);
+        }
     }
 
     private void SetupListeners()
@@ -71,6 +87,10 @@ public class SettingsManager : MonoBehaviour
             mouseSensitivitySlider.onValueChanged.AddListener(OnSensitivityChanged);
         if (invertYToggle != null) 
             invertYToggle.onValueChanged.AddListener(OnInvertYChanged);
+        
+        // Developer listeners
+        if (cheatsToggle != null)
+            cheatsToggle.onValueChanged.AddListener(OnCheatsChanged);
     }
 
     private void LoadSettings()
@@ -84,7 +104,10 @@ public class SettingsManager : MonoBehaviour
         if (musicVolumeSlider != null) musicVolumeSlider.value = musicVol;
         if (sfxVolumeSlider != null) sfxVolumeSlider.value = sfxVol;
 
-        AudioListener.volume = masterVol;
+        // Apply to Audio Mixer
+        SetMixerVolume("MasterVolume", masterVol);
+        SetMixerVolume("MusicVolume", musicVol);
+        SetMixerVolume("SFXVolume", sfxVol);
 
         // Load Graphics Settings
         int quality = PlayerPrefs.GetInt(QUALITY_KEY, QualitySettings.GetQualityLevel());
@@ -101,9 +124,11 @@ public class SettingsManager : MonoBehaviour
         // Load Gameplay Settings
         MouseSensitivity = PlayerPrefs.GetFloat(SENSITIVITY_KEY, 2.0f);
         InvertY = PlayerPrefs.GetInt(INVERT_Y_KEY, 0) == 1;
+        CheatsEnabled = PlayerPrefs.GetInt(CHEATS_KEY, 0) == 1;
 
         if (mouseSensitivitySlider != null) mouseSensitivitySlider.value = MouseSensitivity;
         if (invertYToggle != null) invertYToggle.isOn = InvertY;
+        if (cheatsToggle != null) cheatsToggle.isOn = CheatsEnabled;
 
         UpdateAllTexts();
     }
@@ -111,7 +136,7 @@ public class SettingsManager : MonoBehaviour
     // === AUDIO CALLBACKS ===
     private void OnMasterVolumeChanged(float value)
     {
-        AudioListener.volume = value;
+        SetMixerVolume("MasterVolume", value);
         PlayerPrefs.SetFloat(MASTER_VOLUME_KEY, value);
         if (masterVolumeText != null) 
             masterVolumeText.text = Mathf.RoundToInt(value * 100) + "%";
@@ -119,22 +144,35 @@ public class SettingsManager : MonoBehaviour
 
     private void OnMusicVolumeChanged(float value)
     {
+        SetMixerVolume("MusicVolume", value);
         PlayerPrefs.SetFloat(MUSIC_VOLUME_KEY, value);
         if (musicVolumeText != null) 
             musicVolumeText.text = Mathf.RoundToInt(value * 100) + "%";
-        
-        // TODO: Apply to your music audio source
-        // Example: MusicManager.Instance.SetVolume(value);
     }
 
     private void OnSFXVolumeChanged(float value)
     {
+        SetMixerVolume("SFXVolume", value);
         PlayerPrefs.SetFloat(SFX_VOLUME_KEY, value);
         if (sfxVolumeText != null) 
             sfxVolumeText.text = Mathf.RoundToInt(value * 100) + "%";
-        
-        // TODO: Apply to your SFX audio sources
-        // Example: SFXManager.Instance.SetVolume(value);
+    }
+
+    /// <summary>
+    /// Converts linear slider value (0-1) to logarithmic decibel value for Audio Mixer.
+    /// </summary>
+    private void SetMixerVolume(string parameterName, float value)
+    {
+        if (audioMixer == null)
+        {
+            Debug.LogWarning("Audio Mixer is not assigned in SettingsManager!");
+            return;
+        }
+
+        // Convert 0-1 slider value to decibels (-80 to 0 dB)
+        // Using logarithmic scale for natural volume perception
+        float dB = value > 0 ? 20f * Mathf.Log10(value) : -80f;
+        audioMixer.SetFloat(parameterName, dB);
     }
 
     // === GRAPHICS CALLBACKS ===
@@ -169,6 +207,14 @@ public class SettingsManager : MonoBehaviour
     {
         InvertY = enabled;
         PlayerPrefs.SetInt(INVERT_Y_KEY, enabled ? 1 : 0);
+    }
+
+    // === DEVELOPER CALLBACKS ===
+    private void OnCheatsChanged(bool enabled)
+    {
+        CheatsEnabled = enabled;
+        PlayerPrefs.SetInt(CHEATS_KEY, enabled ? 1 : 0);
+        Debug.Log($"Cheats {(enabled ? "ENABLED" : "DISABLED")}");
     }
 
     // === PUBLIC METHODS ===

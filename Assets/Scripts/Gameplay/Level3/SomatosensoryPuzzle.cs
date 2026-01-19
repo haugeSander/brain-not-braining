@@ -39,6 +39,11 @@ public class SomatosensoryPuzzle : PuzzleBase
     [Tooltip("Second tutorial message (after E pressed)")]
     public string secondTutorialMessage = "Sense your way to the prize";
 
+    [Header("Cheat")]
+    [SerializeField] private bool enableCheatTeleport = true;
+    [SerializeField] private KeyCode cheatKey = KeyCode.F;
+    [SerializeField] private GameObject teleportLocation = null;
+
     // References to player systems
     private EcholocationSystem echolocationSystem;
     private EcholocationPulseManager pulseManager;
@@ -112,6 +117,50 @@ public class SomatosensoryPuzzle : PuzzleBase
             if (echolocationSystem != null && pulseManager != null && pulseManager.GetActivePulseCount() > 0)
             {
                 OnFirstPulseTriggered();
+            }
+        }
+        if (SettingsManager.CheatsEnabled && enableCheatTeleport && Input.GetKeyDown(cheatKey))
+        {
+            TeleportPlayer();
+        }
+    }
+
+    private void TeleportPlayer()
+    {
+        if (teleportLocation == null)
+        {
+            Debug.LogWarning("No teleport location assigned!");
+            return;
+        }
+
+        Debug.Log("Teleporting player...");
+
+        // Get the CharacterController component
+        CharacterController controller = GetComponent<CharacterController>();
+
+        if (controller != null)
+        {
+            // For CharacterController, you must disable it first, then move, then re-enable
+            controller.enabled = false;
+            transform.position = teleportLocation.transform.position;
+            transform.rotation = teleportLocation.transform.rotation; // Optional: match rotation too
+            controller.enabled = true;
+        }
+        else
+        {
+            // If using Rigidbody instead
+            Rigidbody rb = GetComponent<Rigidbody>();
+            if (rb != null)
+            {
+                rb.position = teleportLocation.transform.position;
+                rb.rotation = teleportLocation.transform.rotation;
+                rb.linearVelocity = Vector3.zero; // Reset velocity
+            }
+            else
+            {
+                // Fallback: just move the transform
+                transform.position = teleportLocation.transform.position;
+                transform.rotation = teleportLocation.transform.rotation;
             }
         }
     }

@@ -37,7 +37,7 @@ public class CollapsingBox : MonoBehaviour
             // Play the collapse sound, if assigned
             if (collapseSound != null)
             {
-                AudioSource.PlayClipAtPoint(collapseSound, transform.position);
+                AudioHelper.PlaySFX(collapseSound, transform.position);
             }
 
             // Start the collapse sequence after a short delay

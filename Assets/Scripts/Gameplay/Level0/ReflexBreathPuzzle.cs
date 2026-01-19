@@ -37,6 +37,10 @@ public class ReflexBreathPuzzle : PuzzleBase
     [SerializeField] private float minPitch = 0.8f; // Raised from 0.5 to sound less distorted
     [SerializeField] private float maxPitch = 2.5f; // Lowered from 3.0 for less extreme pitch shift
 
+    [SerializeField] private float baseMusicIntensity = 0.15f;
+    [SerializeField] private float maxMusicIntensity = 1f;
+
+
     [Header("UI References")]
     [SerializeField] private TextMeshProUGUI hrText;
     [SerializeField] private Image hrProgressBar;
@@ -51,11 +55,11 @@ public class ReflexBreathPuzzle : PuzzleBase
     [SerializeField] private float fadeToWhiteDuration = 3f; // Slow, dramatic fade
     [SerializeField] private string brainVisualizationScene = "BrainRegionUnlocked";
 
-    [Header("Debug")]
-    [SerializeField] private bool enableDebugBoost = true;
-    [SerializeField] private KeyCode debugBoostKey = KeyCode.D;
-    [SerializeField] private int debugHRBoost = 100;
-    [SerializeField] private int debugBreathCycles = 3;
+    [Header("Cheat")]
+    [SerializeField] private bool enableCheatBoost = true;
+    [SerializeField] private KeyCode cheatKey = KeyCode.F;
+    [SerializeField] private int cheatHRBoost = 100;
+    [SerializeField] private int cheatBreathCycles = 3;
 
     private float spawnTimer;
     private bool gameStarted = false;
@@ -82,16 +86,6 @@ public class ReflexBreathPuzzle : PuzzleBase
     private bool reachedTopThreshold = false; // Did they inhale past 70%?
     private bool releasedCorrectly = false; // Did they release in valid range?
     private float timeBarReachedZero = -1f; // When did the bar reach 0%? (-1 = hasn't reached yet)
-
-    // Methods to implement:
-    // - Start(): Show tutorial, pause spawning
-    // - OnTutorialButtonClick(): Hide tutorial, start game
-    // - Update(): Handle spawning, breath input, HR decay, audio pitch
-    // - SpawnButton(): Instantiate at random position within bounds
-    // - ModifyHeartRate(int amount): Update HR, check win/loss
-    // - UpdateBreathState(): Track inhale/exhale timing and quality
-    // - CheckWinCondition(): HR >= 500 + breath quality threshold
-    // - CheckLossCondition(): HR <= 0 OR irregular breath threshold
 
     protected override void Start()
     {
@@ -190,11 +184,11 @@ public class ReflexBreathPuzzle : PuzzleBase
         if (!gameStarted || isSolved) return;
 
         // Debug: Boost HR and breath cycles
-        if (enableDebugBoost && Input.GetKeyDown(debugBoostKey))
+        if (SettingsManager.CheatsEnabled && enableCheatBoost && Input.GetKeyDown(cheatKey))
         {
-            ModifyHeartRate(debugHRBoost);
-            breathCyclesCompleted = Mathf.Max(breathCyclesCompleted, debugBreathCycles);
-            Debug.Log($"DEBUG: Boosted HR by {debugHRBoost} (now {currentHR}) and set breath cycles to {breathCyclesCompleted}");
+            ModifyHeartRate(cheatHRBoost);
+            breathCyclesCompleted = Mathf.Max(breathCyclesCompleted, cheatBreathCycles);
+            Debug.Log($"DEBUG: Boosted HR by {cheatHRBoost} (now {currentHR}) and set breath cycles to {breathCyclesCompleted}");
         }
 
         // Handle button spawning

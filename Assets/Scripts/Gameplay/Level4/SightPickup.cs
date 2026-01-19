@@ -57,10 +57,10 @@ public class SightPickup : MonoBehaviour
                     Instantiate(collectionEffect, transform.position, Quaternion.identity);
                 }
 
-                // Play the pickup sound using AudioSource.PlayClipAtPoint (doesn't require the object to exist)
+                // Play the pickup sound using AudioHelper.PlaySFX (doesn't require the object to exist)
                 if (pickupSound != null)
                 {
-                    AudioSource.PlayClipAtPoint(pickupSound, transform.position);
+                    AudioHelper.PlaySFX(pickupSound, transform.position);
                 }
 
                 // Hide the visual immediately
