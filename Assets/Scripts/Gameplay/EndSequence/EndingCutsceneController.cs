@@ -4,6 +4,8 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using BrainNotBraining.Gameplay;
+using UnityEngine.Audio;
+using UnityEngine.UI;
 
 namespace BrainNotBraining.Gameplay
 {
@@ -41,6 +43,11 @@ namespace BrainNotBraining.Gameplay
         [SerializeField] private Animator mouseAnimator; // Optional: if you have walk animation
         [SerializeField] private string walkAnimationTrigger = "Walk"; // Animation trigger name
 
+        [Header("Audio Mixer Groups")]
+        [Tooltip("Assign your mixer groups for proper volume control")]
+        public AudioMixerGroup musicMixerGroup;
+        public AudioMixerGroup sfxMixerGroup;
+
         [Header("Audio")]
         [SerializeField] private AudioSource musicSource;
         [SerializeField] private AudioSource sfxSource;
@@ -66,7 +73,7 @@ namespace BrainNotBraining.Gameplay
         [Header("Timing - Phase 2: Escape")]
         [SerializeField] private float cageDoorOpenDuration = 1.5f;
         [SerializeField] private float mouseWalkDuration = 4f;
-        [SerializeField] private float mouseWalkDistance = 5f;
+        [SerializeField] private float mouseWalkDistance = 3f;
         [SerializeField] private float mouseHoldDuration = 2f;
         [SerializeField] private float escapePhaseTransitionDuration = 2f;
 
@@ -75,6 +82,10 @@ namespace BrainNotBraining.Gameplay
         [SerializeField] private float creditsDisplayDuration = 15f;
         [SerializeField] private float creditsFadeOutDuration = 2f;
         [SerializeField] private string returnToScene = "MainMenu";
+        [SerializeField] private float creditsScrollSpeed = 40f;
+        [SerializeField] private float creditsEndPadding = 100f;
+        [SerializeField] private float finalLineHoldDuration = 3f;
+
 
         [Header("Controls")]
         [SerializeField] private KeyCode skipButton = KeyCode.S;
@@ -180,6 +191,19 @@ namespace BrainNotBraining.Gameplay
             {
                 cageDoor.SetActive(true);
             }
+
+            if (musicSource == null)
+            {
+                musicSource = gameObject.AddComponent<AudioSource>();
+                musicSource.outputAudioMixerGroup = musicMixerGroup;
+            }
+
+            if (sfxSource == null)
+            {
+                sfxSource = gameObject.AddComponent<AudioSource>();
+                sfxSource.outputAudioMixerGroup = sfxMixerGroup;
+            }
+
         }
 
         private void Start()
@@ -324,10 +348,10 @@ namespace BrainNotBraining.Gameplay
             }
 
             // Optional: Add screen flash effect
-            // if (screenFlash != null)
-            // {
-            //     screenFlash.Flash(Color.white, 0.3f, 0.5f);
-            // }
+            if (screenFlash != null)
+            {
+                screenFlash.FlashWhite();
+            }
         }
 
         private IEnumerator TransitionToEscapePhase()
@@ -449,7 +473,7 @@ namespace BrainNotBraining.Gameplay
 
             // Move mouse forward
             Vector3 startPos = mouseCharacter.position;
-            Vector3 endPos = startPos + mouseCharacter.forward * mouseWalkDistance;
+            Vector3 endPos = startPos + mouseCharacter.up * mouseWalkDistance;
 
             float elapsed = 0f;
 
@@ -569,13 +593,54 @@ namespace BrainNotBraining.Gameplay
             yield return StartCoroutine(FadeInCreditsText());
 
             // Display credits
-            yield return new WaitForSeconds(creditsDisplayDuration);
+            yield return StartCoroutine(ScrollCreditsAndCenterFinalLine());
 
             // Fade out everything
             yield return StartCoroutine(FadeOutCredits());
 
             // Return to main menu
             UnityEngine.SceneManagement.SceneManager.LoadScene(returnToScene);
+        }
+
+        private IEnumerator ScrollCreditsAndCenterFinalLine()
+        {
+            RectTransform rect = creditsText.rectTransform;
+
+            // Force TMP to calculate size
+            LayoutRebuilder.ForceRebuildLayoutImmediate(rect);
+
+            TMP_TextInfo textInfo = creditsText.textInfo;
+            int lastLineIndex = textInfo.lineCount - 1;
+
+            if (lastLineIndex < 0)
+                yield break;
+
+            TMP_LineInfo lastLine = textInfo.lineInfo[lastLineIndex];
+
+            Canvas canvas = creditsText.GetComponentInParent<Canvas>();
+            RectTransform canvasRect = canvas.GetComponent<RectTransform>();
+            float canvasHeight = canvasRect.rect.height;
+
+            float startY = -canvasHeight;
+            rect.anchoredPosition = new Vector2(0, startY);
+
+            // Position where last line is centered on screen
+            float targetY =
+                (canvasHeight / 2f)
+                - lastLine.ascender
+                - lastLine.baseline;
+
+            while (rect.anchoredPosition.y < targetY)
+            {
+                rect.anchoredPosition += Vector2.up * creditsScrollSpeed * Time.deltaTime;
+                yield return null;
+            }
+
+            // Snap exactly to center
+            rect.anchoredPosition = new Vector2(0, targetY);
+
+            // Hold final line
+            yield return new WaitForSeconds(finalLineHoldDuration);
         }
 
         private IEnumerator FadeInCreditsText()
