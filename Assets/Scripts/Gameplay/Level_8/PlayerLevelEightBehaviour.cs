@@ -1,6 +1,7 @@
 using TMPro;
 using Unity.Burst.CompilerServices;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 public class PlayerLevelEightBehaviour : MonoBehaviour
@@ -90,9 +91,12 @@ public class PlayerLevelEightBehaviour : MonoBehaviour
         AudioSource.PlayOneShot(JumpSound);
     }
 
-    void OnUse()
-    {
+    void OnUse(InputValue value)
 
+    {
+        if(!value.isPressed)return;
+
+        Debug.Log($"OnUse chiamata su {gameObject.name} al frame {Time.frameCount} - HashCode Script: {this.GetHashCode()}");
         if (!isTakingABlock)
         {
             Debug.Log("object grabbed");
@@ -198,8 +202,8 @@ public class PlayerLevelEightBehaviour : MonoBehaviour
         {
             // 1. Detach and Reset Velocities
             BlockTaken.transform.parent = null;
-            BlockTaken.linearVelocity = Vector3.zero;
-            BlockTaken.angularVelocity = Vector3.zero;
+            // BlockTaken.linearVelocity = Vector3.zero;
+            // BlockTaken.angularVelocity = Vector3.zero;
             BlockTaken.transform.rotation = Quaternion.identity;
 
             // 2. Reactivate Collider  (Best Practice)
