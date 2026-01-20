@@ -60,19 +60,19 @@ public class PlayerLevelEightBehaviour : MonoBehaviour
         else if (speed >= 8.0f)
         {
 
-        // Debug.Log($"Speed:{speed}");
-            if (AudioSource.isPlaying && AudioSource.clip!=FastFootSteps)
+            // Debug.Log($"Speed:{speed}");
+            if (AudioSource.isPlaying && AudioSource.clip != FastFootSteps)
             {
                 AudioSource.Stop();
 
             }
-            
+
             if (!AudioSource.isPlaying)
             {
                 AudioSource.clip = FastFootSteps;
                 AudioSource.Play();
             }
-            
+
 
         }
         else
@@ -167,7 +167,7 @@ public class PlayerLevelEightBehaviour : MonoBehaviour
             isTakingABlock = true;
             BlockTaken.centerOfMass = Vector3.zero;
             AudioHelper.PlaySFX(BoxPickupClip, transform.position, 1f);
-            
+
             HintText.text = "Press F to release";
             HintText.enabled = true;
         }

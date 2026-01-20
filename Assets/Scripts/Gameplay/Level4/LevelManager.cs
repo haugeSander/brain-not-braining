@@ -122,9 +122,9 @@ public class LevelManager : MonoBehaviour
         {
             yield return new WaitForSecondsRealtime(completionDelay);
         }
-        ProgressionManager.PendingUnlock = BrainRegion.VisualCortex;
+        // ProgressionManager.PendingUnlock = BrainRegion.VisualCortex;
         Debug.Log("Pending unlock set to Vision");
-        UnityEngine.SceneManagement.SceneManager.LoadScene("BrainRegionUnlocked");
+        UnityEngine.SceneManagement.SceneManager.LoadScene("Puzzle_6");
     }
 
     private IEnumerator TutorialSequence()

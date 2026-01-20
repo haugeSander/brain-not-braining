@@ -3,6 +3,7 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using BrainNotBraining.Core;
 
 public class EndLevel8 : MonoBehaviour
 {
@@ -53,7 +54,9 @@ public class EndLevel8 : MonoBehaviour
         Debug.Log("Level Complete!");
         AudioHelper.PlaySFX(DoorOpeningClip, transform.position, 1f);
         yield return new WaitForSeconds(DoorOpeningClip.length);
+
+        ProgressionManager.PendingUnlock = BrainRegion.Full;
         
-        SceneManager.LoadScene("LevelFinished");
+        SceneManager.LoadScene("EndSequence");
     }
 }

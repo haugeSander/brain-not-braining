@@ -297,10 +297,13 @@ namespace BrainNotBraining.Gameplay
                     return "Level_3_somatosensory";
                 case BrainRegion.Somatosensory:
                     return "Level_4_visualcortex";
+                    // Direct tranfer to Puzzle_6 after level 4 completion.
                 case BrainRegion.VisualCortex:
-                    return "Puzzle_6";
+                    return "Test_Path";
                 case BrainRegion.Prefrontal:
-                    return "Level_7_PrefrontalCortex";
+                    return "Level_8_PrefrontalCortex";
+                case BrainRegion.Full:
+                    return "EndSequence";
                 default:
                     Debug.LogWarning($"No next scene defined for region {unlockedRegion}, loading fallback");
                     return fallbackSceneName; // Game complete, return to main menu
