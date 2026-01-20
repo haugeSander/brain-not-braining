@@ -6,7 +6,7 @@ using BrainNotBraining.Gameplay;
 public class EndLevelTrigger : MonoBehaviour
 {
     public float fadeDuration = 1.5f;
-    private const string BRAIN_REGION_SCENE = "BrainRegionUnlocked";
+    public string BRAIN_REGION_SCENE = "BrainRegionUnlocked";
 
     private void OnTriggerEnter(Collider other)
     {
