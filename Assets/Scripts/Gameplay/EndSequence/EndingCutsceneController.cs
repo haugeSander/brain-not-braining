@@ -564,18 +564,30 @@ namespace BrainNotBraining.Gameplay
                 musicSource.Play();
             }
 
+
+
+            // Set credits text
+            if (creditsText != null)
+            {
+                // Set text first
+                creditsText.text = creditsContent;
+
+                // Force layout & mesh update
+                LayoutRebuilder.ForceRebuildLayoutImmediate(creditsText.rectTransform);
+                creditsText.ForceMeshUpdate();
+
+                // Move text off-screen BEFORE showing
+                Canvas canvas = creditsText.GetComponentInParent<Canvas>();
+                float canvasHeight = canvas.GetComponent<RectTransform>().rect.height;
+                creditsText.rectTransform.anchoredPosition = new Vector2(0, -canvasHeight);
+            }
+
             // Show credits panel
             if (creditsPanel != null)
             {
                 creditsPanel.SetActive(true);
             }
 
-            // Set credits text
-            if (creditsText != null)
-            {
-                creditsText.text = creditsContent;
-                creditsText.color = new Color(1, 1, 1, 0); // Start transparent
-            }
 
             // Fade from black
             if (screenFlash != null)
