@@ -105,9 +105,6 @@ public class ColorChangingHole : MonoBehaviour
     if (winText != null)
         winText.gameObject.SetActive(true);
 
-    if (restartButton != null)
-        restartButton.SetActive(true);
-
     Cursor.lockState = CursorLockMode.None;
     Cursor.visible = true;
 
