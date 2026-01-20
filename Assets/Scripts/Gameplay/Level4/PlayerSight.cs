@@ -44,7 +44,7 @@ public class PlayerSight : MonoBehaviour
         uiManager = FindObjectOfType<UIManager>();
         currentSightTime = maxSightTime;
         IsSeeing = false; // Start with sight disabled
-        // Start in normal vision (1 = normal, 0 = edge detection)
+        // Start in normal vision (0 = normal, 1 = edge detection)
         Shader.SetGlobalFloat(BlendAmountID, 1f);
     }
 
@@ -62,19 +62,19 @@ public class PlayerSight : MonoBehaviour
     private void OnDestroy()
     {
         // Cleanup: Reset to normal vision when destroyed
-        Shader.SetGlobalFloat(BlendAmountID, 1f);
+        Shader.SetGlobalFloat(BlendAmountID, 0f);
     }
 
     private void OnApplicationQuit()
     {
         // Reset to normal vision when exiting play mode in editor
-        Shader.SetGlobalFloat(BlendAmountID, 1f);
+        Shader.SetGlobalFloat(BlendAmountID, 0f);
     }
 
     private void OnDisable()
     {
         // Reset to normal vision when script is disabled (e.g., exiting play mode)
-        Shader.SetGlobalFloat(BlendAmountID, 1f);
+        Shader.SetGlobalFloat(BlendAmountID, 0f);
     }
 
     private void HandleSightAbility()
