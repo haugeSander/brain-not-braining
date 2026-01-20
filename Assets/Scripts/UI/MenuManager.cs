@@ -7,6 +7,8 @@ public class MenuManager : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private LevelSelectManager levelSelectManager;
+    [SerializeField] private CreditsController creditsController;
+
 
     void Start()
     {
@@ -54,9 +56,15 @@ public class MenuManager : MonoBehaviour
     public void OnClickExit()
     {
         Application.Quit();
-        
-        #if UNITY_EDITOR
+
+#if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
-        #endif
+#endif
     }
+
+    public void OnClickCredits()
+    {
+        creditsController.PlayCredits();
+    }
+
 }
