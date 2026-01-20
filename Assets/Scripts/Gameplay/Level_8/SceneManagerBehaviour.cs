@@ -12,15 +12,18 @@ public class SceneManagerBehaviour : MonoBehaviour
 
     void Update()
     {
+
         timeLeft -= Time.deltaTime;
-        countdownText.text = ((int)timeLeft).ToString();
+        if(countdownText != null)
+            countdownText.text = ((int)timeLeft).ToString();
         if (timeLeft < 30.0f)
         {
             countdownText.color = Color.red;
         }
         if (timeLeft < 0)
         {
-            countdownText.text = "YOU LOSE!";
+            if(countdownText != null)
+                countdownText.text = "YOU LOSE!";
 
             StartCoroutine(GameOver());
         }
