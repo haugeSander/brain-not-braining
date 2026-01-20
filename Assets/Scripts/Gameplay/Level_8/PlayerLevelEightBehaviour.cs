@@ -227,7 +227,7 @@ public class PlayerLevelEightBehaviour : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        Debug.Log("Collision Detected " + other.gameObject);
+        // Debug.Log("Collision Detected " + other.gameObject);
         if (other.gameObject.tag == "Interactable" && !isTakingABlock)
         {
             HintText.text = "Press F to Interact";
