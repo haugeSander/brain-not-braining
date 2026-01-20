@@ -3,7 +3,6 @@ using UnityEngine;
 public class Tile : MonoBehaviour
 {
     public bool isCorrectTile;
-    //[SerializeField] private GameObject cheatPlane;
 
     private Renderer rend;
     private Collider col;
@@ -16,7 +15,6 @@ public class Tile : MonoBehaviour
 
     void Awake()
     {
-        //cheatPlane.GetComponent<MeshRenderer>().enabled = false;
         rend = GetComponent<Renderer>();
         col = GetComponent<Collider>();
         rend.material.color = defaultColor;
@@ -49,9 +47,5 @@ public class Tile : MonoBehaviour
          
     }
 
-    /*void TogglePlane()
-    {
-        MeshRenderer renderer = cheatPlane.GetComponent<MeshRenderer>();
-        renderer.enabled = !renderer.enabled;
-    }*/
+    
 }
