@@ -16,7 +16,8 @@ namespace BrainNotBraining.Core
         MotorCortex = 2,    // Level 1: Movement (WASD)
         Somatosensory = 3,  // Level 2: Touch/spatial awareness
         VisualCortex = 4,   // Level 3: Sight (B&W → Color)
-        Prefrontal = 5      // Level 4: Reasoning/memory
+        Prefrontal = 5,     // Level 4: Reasoning/memory
+        Full = 6            // Level 5: All together
     }
 
     /// <summary>

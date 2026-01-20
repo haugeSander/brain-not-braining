@@ -11,7 +11,7 @@ public class ColorChangingHole : MonoBehaviour
     public TMP_Text countdownText; 
 
     [Header("Scene Settings")]
-    public string sceneToLoad;
+    public string sceneToLoad = "Test_Path";
 
     [Header("Color Setup")]
     public BlockColor[] availableColors = { BlockColor.Red, BlockColor.Green, BlockColor.Yellow, BlockColor.Blue };
@@ -111,7 +111,7 @@ public class ColorChangingHole : MonoBehaviour
     Cursor.lockState = CursorLockMode.None;
     Cursor.visible = true;
 
-    ProgressionManager.PendingUnlock = BrainRegion.Prefrontal;
+    ProgressionManager.PendingUnlock = BrainRegion.VisualCortex;
 
     StartCoroutine(LoadNextSceneAfterDelay(5f));
 }
