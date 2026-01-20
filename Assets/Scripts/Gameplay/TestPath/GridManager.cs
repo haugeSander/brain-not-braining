@@ -8,15 +8,23 @@ public class GridManager : MonoBehaviour
     public int height = 10;
     public float tileSpacing = 1.1f;
 
+    public float pathPreviewTime = 3f;
+
     public Tile tilePrefab;
     private Tile[,] grid;
+    
 
     void Start()
     {
-        GenerateGrid();
-        List<Vector2Int> path = GeneratePath();
-        StartCoroutine(PreviewPath(path));
+        
     }
+
+    public void StartGame()
+{
+    GenerateGrid();
+    List<Vector2Int> path = GeneratePath();
+    StartCoroutine(PreviewPath(path));
+}
 
     void GenerateGrid()
     {
@@ -61,7 +69,7 @@ public class GridManager : MonoBehaviour
         foreach (var p in path)
             grid[p.x, p.y].SetPreview(true);
 
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(pathPreviewTime);
 
         // Hide path
         foreach (var p in path)

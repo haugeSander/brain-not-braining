@@ -13,6 +13,11 @@ public class CameraIntroTransition : MonoBehaviour
 
     void Start()
     {
+        
+    }
+
+    public void GameStart()
+    {
         startPos = transform.position;
         startRot = transform.rotation;
         Invoke(nameof(StartTransition), delayBeforeMove);
