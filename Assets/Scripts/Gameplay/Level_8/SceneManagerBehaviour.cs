@@ -40,6 +40,7 @@ public class SceneManagerBehaviour : MonoBehaviour
             StartCoroutine(GameOver());
         }
     }
+
     // to use the menu for restarting level
     IEnumerator GameOver()
     {

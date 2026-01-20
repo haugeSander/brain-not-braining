@@ -10,6 +10,16 @@ using UnityEngine.UI;
 namespace BrainNotBraining.Gameplay
 {
     /// <summary>
+    /// Type of animator parameter for controlling animations
+    /// </summary>
+    public enum AnimationParameterType
+    {
+        Trigger,
+        Bool,
+        None
+    }
+
+    /// <summary>
     /// Controls the ending cutscene with three phases:
     /// 1. Full brain activation
     /// 2. Mouse escape from cage
@@ -40,8 +50,13 @@ namespace BrainNotBraining.Gameplay
         [SerializeField] private GameObject cage;
         [SerializeField] private GameObject cageDoor;
         [SerializeField] private Transform mouseCharacter;
-        [SerializeField] private Animator mouseAnimator; // Optional: if you have walk animation
-        [SerializeField] private string walkAnimationTrigger = "Walk"; // Animation trigger name
+        [SerializeField] private Animator mouseAnimator;
+        
+        [Tooltip("Animation parameter name - can be Trigger, Bool, or leave empty to skip")]
+        [SerializeField] private string walkAnimationParameter = "Walk";
+        
+        [Tooltip("Type of animation parameter")]
+        [SerializeField] private AnimationParameterType parameterType = AnimationParameterType.Bool;
 
         [Header("Audio Mixer Groups")]
         [Tooltip("Assign your mixer groups for proper volume control")]
@@ -53,14 +68,11 @@ namespace BrainNotBraining.Gameplay
         [SerializeField] private AudioSource sfxSource;
         [SerializeField] private AudioClip brainFinaleMusic;
         [SerializeField] private AudioClip escapeMusic;
-        [SerializeField] private AudioClip creditsMusic;
         [SerializeField] private AudioClip regionActivationSound;
         [SerializeField] private AudioClip cageDoorSound;
-        [SerializeField] private AudioClip mouseSqueak; // Optional cute touch
+        [SerializeField] private AudioClip mouseSqueak;
 
         [Header("UI")]
-        [SerializeField] private GameObject creditsPanel;
-        [SerializeField] private TextMeshProUGUI creditsText;
         [SerializeField] private TextMeshProUGUI skipHintText;
 
         [Header("Timing - Phase 1: Brain Finale")]
@@ -78,57 +90,10 @@ namespace BrainNotBraining.Gameplay
         [SerializeField] private float escapePhaseTransitionDuration = 2f;
 
         [Header("Timing - Phase 3: Credits")]
-        [SerializeField] private float creditsFadeInDuration = 1.5f;
-        [SerializeField] private float creditsDisplayDuration = 15f;
-        [SerializeField] private float creditsFadeOutDuration = 2f;
-        [SerializeField] private string returnToScene = "MainMenu";
-        [SerializeField] private float creditsScrollSpeed = 40f;
-        [SerializeField] private float creditsEndPadding = 100f;
-        [SerializeField] private float finalLineHoldDuration = 3f;
-
+        [SerializeField] private CreditsController creditsController;
 
         [Header("Controls")]
         [SerializeField] private KeyCode skipButton = KeyCode.S;
-
-        [Header("Credits Content")]
-        [TextArea(10, 20)]
-        [SerializeField] private string creditsContent = @"<size=72><b>Brain Not Braining</b></size>
-
-<size=48>A Game About Discovery</size>
-
-
-
-<size=36><b>Created By</b></size>
-<size=32>Sander Hauge</size>
-<size=32>Christoph Auer</size>
-<size=32>Giulio Francesco Zemignani</size>
-
-
-
-<size=36><b>Programming</b></size>
-<size=28>Giulio Francesco Zemignani</size>
-
-
-
-<size=36><b>Art & Design</b></size>
-<size=28>Sander Hauge</size>
-
-
-
-<size=36><b>Sound & Music</b></size>
-<size=28>pixabay</size>
-
-
-
-<size=36><b>Special Thanks</b></size>
-<size=28>Everyone who supported this project</size>
-
-
-
-<size=48><b>Thank You For Playing!</b></size>
-
-
-<size=24>The mouse brain remembers...</size>";
 
         // Internal state
         private Dictionary<BrainRegion, ParticleSystem> regionParticles;
@@ -156,6 +121,12 @@ namespace BrainNotBraining.Gameplay
                 Debug.LogError("ScreenFlash component not found! Please add it to the scene.");
             }
 
+            // Validate CreditsController
+            if (creditsController == null)
+            {
+                Debug.LogError("CreditsController not assigned! Please assign it in the inspector.");
+            }
+
             // Setup brain material
             if (brainMaterial != null)
             {
@@ -180,12 +151,6 @@ namespace BrainNotBraining.Gameplay
             // Setup cameras
             SetActiveCamera(brainCamera);
 
-            // Hide credits UI
-            if (creditsPanel != null)
-            {
-                creditsPanel.SetActive(false);
-            }
-
             // Setup escape section (initially hidden)
             if (cageDoor != null)
             {
@@ -203,7 +168,6 @@ namespace BrainNotBraining.Gameplay
                 sfxSource = gameObject.AddComponent<AudioSource>();
                 sfxSource.outputAudioMixerGroup = sfxMixerGroup;
             }
-
         }
 
         private void Start()
@@ -335,14 +299,14 @@ namespace BrainNotBraining.Gameplay
 
             SetBrainTransparency(brainFinalTransparency);
 
-            // Boost all particle emission (if you have emission rate control)
+            // Boost all particle emission
             foreach (var ps in regionParticles.Values)
             {
                 if (ps != null)
                 {
                     var emission = ps.emission;
                     var rateOverTime = emission.rateOverTime;
-                    rateOverTime.constant *= 2f; // Double the particles
+                    rateOverTime.constant *= 2f;
                     emission.rateOverTime = rateOverTime;
                 }
             }
@@ -362,9 +326,18 @@ namespace BrainNotBraining.Gameplay
                 bool fadeComplete = false;
                 screenFlash.FadeToVoid(brainPhaseTransitionDuration, () => fadeComplete = true);
 
-                while (!fadeComplete)
+                float timer = 0f;
+                float timeout = brainPhaseTransitionDuration + 1f; // Add 1 second buffer
+                
+                while (!fadeComplete && timer < timeout)
                 {
+                    timer += Time.deltaTime;
                     yield return null;
+                }
+                
+                if (!fadeComplete)
+                {
+                    Debug.LogWarning("Fade to void timeout - continuing anyway");
                 }
             }
             else
@@ -381,9 +354,18 @@ namespace BrainNotBraining.Gameplay
                 bool fadeComplete = false;
                 screenFlash.FadeFromVoid(1f, () => fadeComplete = true);
 
-                while (!fadeComplete)
+                float timer = 0f;
+                float timeout = 2f;
+                
+                while (!fadeComplete && timer < timeout)
                 {
+                    timer += Time.deltaTime;
                     yield return null;
+                }
+                
+                if (!fadeComplete)
+                {
+                    Debug.LogWarning("Fade from void timeout - continuing anyway");
                 }
             }
         }
@@ -434,7 +416,7 @@ namespace BrainNotBraining.Gameplay
 
             // Animate door opening (rotate or slide)
             Vector3 startRotation = cageDoor.transform.localEulerAngles;
-            Vector3 endRotation = startRotation + new Vector3(0, -90, 0); // Swing open
+            Vector3 endRotation = startRotation + new Vector3(0, -90, 0);
 
             float elapsed = 0f;
 
@@ -466,9 +448,19 @@ namespace BrainNotBraining.Gameplay
             }
 
             // Trigger walk animation if available
-            if (mouseAnimator != null && !string.IsNullOrEmpty(walkAnimationTrigger))
+            if (mouseAnimator != null && !string.IsNullOrEmpty(walkAnimationParameter))
             {
-                mouseAnimator.SetTrigger(walkAnimationTrigger);
+                switch (parameterType)
+                {
+                    case AnimationParameterType.Trigger:
+                        mouseAnimator.SetTrigger(walkAnimationParameter);
+                        Debug.Log($"Setting animation trigger: {walkAnimationParameter}");
+                        break;
+                    case AnimationParameterType.Bool:
+                        mouseAnimator.SetBool(walkAnimationParameter, true);
+                        Debug.Log($"Setting animation bool: {walkAnimationParameter} = true");
+                        break;
+                }
             }
 
             // Move mouse forward
@@ -489,6 +481,13 @@ namespace BrainNotBraining.Gameplay
             }
 
             mouseCharacter.position = endPos;
+            
+            // Stop walk animation if using bool
+            if (mouseAnimator != null && !string.IsNullOrEmpty(walkAnimationParameter) && parameterType == AnimationParameterType.Bool)
+            {
+                mouseAnimator.SetBool(walkAnimationParameter, false);
+                Debug.Log($"Setting animation bool: {walkAnimationParameter} = false");
+            }
 
             // Optional: Mouse looks back at camera
             yield return StartCoroutine(MouseLookBack());
@@ -527,9 +526,18 @@ namespace BrainNotBraining.Gameplay
                 bool fadeComplete = false;
                 screenFlash.FadeToVoid(escapePhaseTransitionDuration, () => fadeComplete = true);
 
-                while (!fadeComplete)
+                float timer = 0f;
+                float timeout = escapePhaseTransitionDuration + 1f;
+                
+                while (!fadeComplete && timer < timeout)
                 {
+                    timer += Time.deltaTime;
                     yield return null;
+                }
+                
+                if (!fadeComplete)
+                {
+                    Debug.LogWarning("Fade to void timeout (credits transition) - continuing anyway");
                 }
             }
             else
@@ -556,140 +564,23 @@ namespace BrainNotBraining.Gameplay
             Debug.Log("=== PHASE 3: Credits ===");
             inCredits = true;
 
-            // Start credits music
-            if (creditsMusic != null && musicSource != null)
+            if (creditsController != null)
             {
-                musicSource.Stop();
-                musicSource.clip = creditsMusic;
-                musicSource.Play();
-            }
-
-
-
-            // Set credits text
-            if (creditsText != null)
-            {
-                // Set text first
-                creditsText.text = creditsContent;
-
-                // Force layout & mesh update
-                LayoutRebuilder.ForceRebuildLayoutImmediate(creditsText.rectTransform);
-                creditsText.ForceMeshUpdate();
-
-                // Move text off-screen BEFORE showing
-                Canvas canvas = creditsText.GetComponentInParent<Canvas>();
-                float canvasHeight = canvas.GetComponent<RectTransform>().rect.height;
-                creditsText.rectTransform.anchoredPosition = new Vector2(0, -canvasHeight);
-            }
-
-            // Show credits panel
-            if (creditsPanel != null)
-            {
-                creditsPanel.SetActive(true);
-            }
-
-
-            // Fade from black
-            if (screenFlash != null)
-            {
-                bool fadeComplete = false;
-                screenFlash.FadeFromVoid(creditsFadeInDuration, () => fadeComplete = true);
-
-                while (!fadeComplete)
+                // Stop any music from previous phases
+                if (musicSource != null)
                 {
-                    yield return null;
+                    musicSource.Stop();
                 }
-            }
 
-            // Fade in credits text
-            yield return StartCoroutine(FadeInCreditsText());
-
-            // Display credits
-            yield return StartCoroutine(ScrollCreditsAndCenterFinalLine());
-
-            // Fade out everything
-            yield return StartCoroutine(FadeOutCredits());
-
-            // Return to main menu
-            UnityEngine.SceneManagement.SceneManager.LoadScene(returnToScene);
-        }
-
-        private IEnumerator ScrollCreditsAndCenterFinalLine()
-        {
-            RectTransform rect = creditsText.rectTransform;
-
-            // Force TMP to calculate size
-            LayoutRebuilder.ForceRebuildLayoutImmediate(rect);
-
-            TMP_TextInfo textInfo = creditsText.textInfo;
-            int lastLineIndex = textInfo.lineCount - 1;
-
-            if (lastLineIndex < 0)
+                // Start credits (CreditsController handles its own music and scene transition)
+                creditsController.PlayCredits();
+                
+                // Credits will handle the rest, including loading the next scene
                 yield break;
-
-            TMP_LineInfo lastLine = textInfo.lineInfo[lastLineIndex];
-
-            Canvas canvas = creditsText.GetComponentInParent<Canvas>();
-            RectTransform canvasRect = canvas.GetComponent<RectTransform>();
-            float canvasHeight = canvasRect.rect.height;
-
-            float startY = -canvasHeight;
-            rect.anchoredPosition = new Vector2(0, startY);
-
-            // Position where last line is centered on screen
-            float targetY =
-                (canvasHeight / 2f)
-                - lastLine.ascender
-                - lastLine.baseline;
-
-            while (rect.anchoredPosition.y < targetY)
-            {
-                rect.anchoredPosition += Vector2.up * creditsScrollSpeed * Time.deltaTime;
-                yield return null;
-            }
-
-            // Snap exactly to center
-            rect.anchoredPosition = new Vector2(0, targetY);
-
-            // Hold final line
-            yield return new WaitForSeconds(finalLineHoldDuration);
-        }
-
-        private IEnumerator FadeInCreditsText()
-        {
-            if (creditsText == null)
-                yield break;
-
-            float elapsed = 0f;
-            float duration = creditsFadeInDuration;
-
-            while (elapsed < duration)
-            {
-                float alpha = Mathf.Lerp(0, 1, elapsed / duration);
-                creditsText.color = new Color(1, 1, 1, alpha);
-                elapsed += Time.deltaTime;
-                yield return null;
-            }
-
-            creditsText.color = Color.white;
-        }
-
-        private IEnumerator FadeOutCredits()
-        {
-            // Fade to black
-            if (screenFlash != null)
-            {
-                bool fadeComplete = false;
-                screenFlash.FadeToVoid(creditsFadeOutDuration, () => fadeComplete = true);
-
-                while (!fadeComplete)
-                {
-                    yield return null;
-                }
             }
             else
             {
-                yield return new WaitForSeconds(creditsFadeOutDuration);
+                Debug.LogError("CreditsController is null! Cannot play credits.");
             }
         }
 
@@ -746,14 +637,30 @@ namespace BrainNotBraining.Gameplay
                 bool fadeComplete = false;
                 screenFlash.FadeToVoid(0.5f, () => fadeComplete = true);
 
-                while (!fadeComplete)
+                float timer = 0f;
+                float timeout = 1.5f;
+                
+                while (!fadeComplete && timer < timeout)
                 {
+                    timer += Time.deltaTime;
                     yield return null;
+                }
+                
+                if (!fadeComplete)
+                {
+                    Debug.LogWarning("Fade to void timeout (skip) - continuing anyway");
                 }
             }
 
             // Jump straight to credits
             SetActiveCamera(creditsCamera);
+            
+            // Hide skip hint
+            if (skipHintText != null)
+            {
+                skipHintText.gameObject.SetActive(false);
+            }
+            
             yield return StartCoroutine(Phase3_Credits());
         }
 

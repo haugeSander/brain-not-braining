@@ -6,12 +6,12 @@ using UnityEngine.UI;
 public class PlayerLevelEightBehaviour : MonoBehaviour
 {
 
+    [Header("Somatosensory Configuration")]
+    [Tooltip("Player GameObject (for finding systems)")]
+    public GameObject player;
+
     BoxCollider PlayerBoxCollider;
     public TextMeshProUGUI HintText;
-
-
-
-
 
     bool HasTouchedADoor = false;
 
@@ -28,21 +28,34 @@ public class PlayerLevelEightBehaviour : MonoBehaviour
     public AudioClip FastFootSteps;
     AudioSource AudioSource;
 
-
     float speed = 0;
 
     Vector3 lastPosition = Vector3.zero;
+
+    [Header("Cheat")]
+    [SerializeField] private bool enableCheatTeleport = true;
+    [SerializeField] private KeyCode cheatKey = KeyCode.F;
+    [SerializeField] private GameObject teleportLocation = null;
+
     public void Start()
     {
+        // Find player if not assigned
+        if (player == null)
+        {
+            player = GameObject.FindGameObjectWithTag("Player");
+        }
+
         PlayerBoxCollider = GetComponent<BoxCollider>();
 
         AudioSource = GetComponent<AudioSource>();
-
     }
 
     public void Update()
     {
-
+        if (SettingsManager.CheatsEnabled && enableCheatTeleport && Input.GetKeyDown(cheatKey))
+        {
+            TeleportPlayer();
+        }
     }
     void FixedUpdate()
     {
@@ -307,4 +320,49 @@ public class PlayerLevelEightBehaviour : MonoBehaviour
         //     HasTouchedDemolitionBall = false;
         // }
     }
+
+    private void TeleportPlayer()
+    {
+        if (teleportLocation == null)
+        {
+            Debug.LogWarning("No teleport location assigned!");
+            return;
+        }
+
+        Debug.Log("Teleporting player...");
+
+        // Prefer CharacterController if present
+        CharacterController controller = player.GetComponent<CharacterController>();
+
+        if (controller != null)
+        {
+            // Disable controller before moving
+            controller.enabled = false;
+
+            player.transform.position = teleportLocation.transform.position;
+            player.transform.rotation = teleportLocation.transform.rotation;
+
+            // Re-enable controller
+            controller.enabled = true;
+        }
+        else
+        {
+            // Fallback: Rigidbody (if ever used elsewhere)
+            Rigidbody rb = player.GetComponent<Rigidbody>();
+            if (rb != null)
+            {
+                rb.linearVelocity = Vector3.zero;
+                rb.angularVelocity = Vector3.zero;
+                rb.position = teleportLocation.transform.position;
+                rb.rotation = teleportLocation.transform.rotation;
+            }
+            else
+            {
+                // Absolute fallback
+                player.transform.position = teleportLocation.transform.position;
+                player.transform.rotation = teleportLocation.transform.rotation;
+            }
+        }
+    }
+
 }

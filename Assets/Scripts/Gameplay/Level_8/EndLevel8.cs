@@ -44,10 +44,6 @@ public class EndLevel8 : MonoBehaviour
         text.enabled = false;
     }
 
-    
-
-
-
      IEnumerator EndLevel()
     {
         isLoading=true;
