@@ -19,13 +19,11 @@ public class DemolishableBoxBehaviour : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
-   
-
 
         if (collision.gameObject.tag == "DemolitionBall")
         {
             
-            SoundManager.instance.PlaySound(HitSound);
+            AudioHelper.PlaySFX(HitSound, transform.position, 1f);
         }
         
             

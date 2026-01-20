@@ -165,9 +165,9 @@ public class PlayerLevelEightBehaviour : MonoBehaviour
             BlockTaken.transform.localPosition = new Vector3(0.0f, 0.5f, 1.5f);
 
             isTakingABlock = true;
-            // SoundManager.instance.PlaySound(InteractableBoxGrabClip);
             BlockTaken.centerOfMass = Vector3.zero;
-            SoundManager.instance.PlaySound(BoxPickupClip);
+            AudioHelper.PlaySFX(BoxPickupClip, transform.position, 1f);
+            
             HintText.text = "Press F to release";
             HintText.enabled = true;
         }
@@ -230,7 +230,7 @@ public class PlayerLevelEightBehaviour : MonoBehaviour
 
             BlockTaken = null;
             isTakingABlock = false;
-            SoundManager.instance.PlaySound(BoxReleaseClip);
+            AudioHelper.PlaySFX(BoxReleaseClip, transform.position, 1f);
         }
 
     }

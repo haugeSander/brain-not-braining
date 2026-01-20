@@ -31,9 +31,9 @@ public class EndLevel8 : MonoBehaviour
              text.text="Level finished continuing...";
             text.enabled= true;
 
-            SoundManager.instance.PlaySound(PressureClip);
+            AudioHelper.PlaySFX(PressureClip, transform.position, 1f);
             
-            SoundManager.instance.PlaySound(DoorOpeningClip);   
+            AudioHelper.PlaySFX(DoorOpeningClip, transform.position, 1f);
             StartCoroutine("EndLevel");
         } 
     }
@@ -51,7 +51,7 @@ public class EndLevel8 : MonoBehaviour
     {
         isLoading=true;
         Debug.Log("Level Complete!");
-        SoundManager.instance.PlaySound(DoorOpeningClip);
+        AudioHelper.PlaySFX(DoorOpeningClip, transform.position, 1f);
         yield return new WaitForSeconds(DoorOpeningClip.length);
         
         SceneManager.LoadScene("LevelFinished");

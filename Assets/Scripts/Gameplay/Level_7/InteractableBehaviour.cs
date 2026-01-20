@@ -33,7 +33,7 @@ public class InteractableBehaviour : MonoBehaviour
         if (collision.gameObject.tag == "DemolitionBall")
         {
             
-            SoundManager.instance.PlaySound(HitSound);
+            AudioHelper.PlaySFX(HitSound, transform.position, 1f);
         }
         
             

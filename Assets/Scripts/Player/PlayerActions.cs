@@ -222,7 +222,7 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
                     ""name"": ""Jump"",
                     ""type"": ""Button"",
                     ""id"": ""03fc6765-4430-4dc5-a134-c9251e60c2ff"",
-                    ""expectedControlType"": ""Button"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
@@ -373,7 +373,7 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
                     ""id"": ""e7c0f27e-d661-4bfe-812b-f71b2f6df5f9"",
                     ""path"": ""<Pointer>/delta"",
                     ""interactions"": """",
-                    ""processors"": ""ScaleVector2(x=5),InvertVector2(invertX=false)"",
+                    ""processors"": ""ScaleVector2(x=5,y=5),InvertVector2(invertX=false)"",
                     ""groups"": """",
                     ""action"": ""Look"",
                     ""isComposite"": false,
