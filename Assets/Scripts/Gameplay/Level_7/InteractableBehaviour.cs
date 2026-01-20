@@ -8,18 +8,16 @@ public class InteractableBehaviour : MonoBehaviour
     public AudioClip HitSound;
     void Start()
     {
-        HintText.enabled = false;
+        if (HintText != null)
+        {
+            HintText.enabled = false;
+        }
         rigidbody = GetComponent<Rigidbody>();
-    }
-
-    void Update()
-    {
-
     }
 
     void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.tag == "Player")
+        if (collision.gameObject.tag == "Player" && HintText != null)
         {
             HintText.text = "Press F to Interact";
             HintText.enabled = true;
@@ -41,7 +39,7 @@ public class InteractableBehaviour : MonoBehaviour
 
     void OnCollisionStay(Collision collision)
     {
-         if (collision.gameObject.tag == "Player")
+         if (collision.gameObject.tag == "Player" && HintText != null)
         {
             HintText.text = "Press F to Interact";
             HintText.enabled = true;
@@ -50,7 +48,7 @@ public class InteractableBehaviour : MonoBehaviour
 
     void OnCollisionExit(Collision collision)
     {
-        if (collision.gameObject.tag == "Player")
+        if (collision.gameObject.tag == "Player" && HintText != null)
         {
             
             HintText.enabled = false;

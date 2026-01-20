@@ -11,7 +11,7 @@ public class ColorChangingHole : MonoBehaviour
     public TMP_Text countdownText; 
 
     [Header("Scene Settings")]
-    public string sceneToLoad = "Test_Path";
+    public string sceneToLoad = "BrainRegionUnlocked";
 
     [Header("Color Setup")]
     public BlockColor[] availableColors = { BlockColor.Red, BlockColor.Green, BlockColor.Yellow, BlockColor.Blue };

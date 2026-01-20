@@ -5,10 +5,25 @@ using UnityEngine.SceneManagement;
 
 public class SceneManagerBehaviour : MonoBehaviour
 {
-
-
     float timeLeft = 180;
     public TextMeshProUGUI countdownText;
+
+    void OnEnable()
+    {
+        // Lock cursor when scene becomes active
+        StartCoroutine(LockCursorAfterDelay());
+    }
+
+    IEnumerator LockCursorAfterDelay()
+    {
+        // Wait one frame to ensure scene is fully loaded
+        yield return null;
+
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+        Debug.Log("Cursor locked by SceneManagerBehaviour");
+    }
+
 
     void Update()
     {
@@ -28,7 +43,7 @@ public class SceneManagerBehaviour : MonoBehaviour
     // to use the menu for restarting level
     IEnumerator GameOver()
     {
-        
+
         yield return new WaitForSeconds(3);
         SceneManager.LoadScene("LevelFinished");
     }
