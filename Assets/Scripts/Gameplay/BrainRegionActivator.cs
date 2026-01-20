@@ -44,6 +44,7 @@ namespace BrainNotBraining.Gameplay
 
         [Header("UI")]
         [SerializeField] private TextMeshProUGUI unlockedRegionText; // Assign your UI Text element here
+        [SerializeField] private TextMeshProUGUI descriptionText; // Drag your description text field here
 
 
         private BrainRegion currentlyActivatingRegion = BrainRegion.None;
@@ -96,6 +97,11 @@ namespace BrainNotBraining.Gameplay
             if (unlockedRegionText != null)
             {
                 unlockedRegionText.gameObject.SetActive(false);
+            }
+            
+            if (descriptionText != null)
+            {
+                descriptionText.gameObject.SetActive(false);
             }
         }
 
@@ -164,6 +170,13 @@ namespace BrainNotBraining.Gameplay
             {
                 unlockedRegionText.text = $"{GetFriendlyRegionName(newlyUnlockedRegion)} Unlocked";
                 unlockedRegionText.gameObject.SetActive(true);
+            }
+            
+            // Display description text
+            if (descriptionText != null)
+            {
+                descriptionText.text = GetRegionDescription(newlyUnlockedRegion);
+                descriptionText.gameObject.SetActive(true);
             }
 
             // Play dramatic music
@@ -368,6 +381,37 @@ namespace BrainNotBraining.Gameplay
         {
             // This will convert "MotorCortex" to "Motor Cortex"
             return System.Text.RegularExpressions.Regex.Replace(region.ToString(), @"(?<=[a-z])(?=[A-Z])", " ");
+        }
+        
+        /// <summary>
+        /// Returns a description of what each brain region does.
+        /// Customize these descriptions to match your game's educational content.
+        /// </summary>
+        private string GetRegionDescription(BrainRegion region)
+        {
+            switch (region)
+            {
+                case BrainRegion.Brainstem:
+                    return "The brainstem controls vital automatic functions like breathing, heart rate, and sleep-wake cycles. It's the brain's connection to the spinal cord.";
+                
+                case BrainRegion.MotorCortex:
+                    return "The motor cortex plans and executes voluntary movements. It sends signals to your muscles to make you move, walk, and interact with the world.";
+                
+                case BrainRegion.Somatosensory:
+                    return "The somatosensory cortex processes touch, temperature, and pain sensations from all over your body. It creates your sense of physical feeling.";
+                
+                case BrainRegion.VisualCortex:
+                    return "The visual cortex processes information from your eyes, allowing you to see shapes, colors, motion, and recognize objects in your environment.";
+                
+                case BrainRegion.Prefrontal:
+                    return "The prefrontal cortex handles complex thinking, decision-making, planning, and personality. It's what makes you uniquely you.";
+                
+                case BrainRegion.Full:
+                    return "The complete brain working in harmony - integrating all regions to create consciousness, thought, and experience.";
+                
+                default:
+                    return "A mysterious region of the brain awaits discovery...";
+            }
         }
     }
 }
