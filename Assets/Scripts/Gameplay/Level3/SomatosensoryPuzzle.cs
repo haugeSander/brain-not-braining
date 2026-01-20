@@ -39,6 +39,11 @@ public class SomatosensoryPuzzle : PuzzleBase
     [Tooltip("Second tutorial message (after E pressed)")]
     public string secondTutorialMessage = "Sense your way to the prize";
 
+    [Header("Cheat")]
+    [SerializeField] private bool enableCheatTeleport = true;
+    [SerializeField] private KeyCode cheatKey = KeyCode.F;
+    [SerializeField] private GameObject teleportLocation = null;
+
     // References to player systems
     private EcholocationSystem echolocationSystem;
     private EcholocationPulseManager pulseManager;
@@ -48,9 +53,11 @@ public class SomatosensoryPuzzle : PuzzleBase
     private bool playerInGoal = false;
     private bool firstPulseTriggered = false;
 
+    private static readonly int BlendAmountID = Shader.PropertyToID("_BlendAmount");
+
     protected override void Start()
     {
-        base.Start();
+        Shader.SetGlobalFloat(BlendAmountID, 1f);
 
         // Find player if not assigned
         if (player == null)
@@ -111,6 +118,36 @@ public class SomatosensoryPuzzle : PuzzleBase
             {
                 OnFirstPulseTriggered();
             }
+        }
+        if (SettingsManager.CheatsEnabled && enableCheatTeleport && Input.GetKeyDown(cheatKey))
+        {
+            TeleportPlayer();
+        }
+    }
+
+    private void TeleportPlayer()
+    {
+        if (teleportLocation == null)
+        {
+            Debug.LogWarning("No teleport location assigned!");
+            return;
+        }
+
+        Debug.Log("Teleporting player...");
+
+        // If using Rigidbody instead
+        Rigidbody rb = player.GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.position = teleportLocation.transform.position;
+            rb.rotation = teleportLocation.transform.rotation;
+            rb.linearVelocity = Vector3.zero; // Reset velocity
+        }
+        else
+        {
+            // Fallback: just move the transform
+            transform.position = teleportLocation.transform.position;
+            transform.rotation = teleportLocation.transform.rotation;
         }
     }
 

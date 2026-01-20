@@ -52,8 +52,10 @@ namespace BrainNotBraining.Gameplay
 
         private bool isTransitioning = false;
 
+        private static readonly int BlendAmountID = Shader.PropertyToID("_BlendAmount");
+
         private void Awake()
-        {
+        {            
             regionParticles[BrainRegion.Brainstem] = brainstemParticles;
             regionParticles[BrainRegion.MotorCortex] = motorCortexParticles;
             regionParticles[BrainRegion.Somatosensory] = somatosensoryParticles;
@@ -99,6 +101,7 @@ namespace BrainNotBraining.Gameplay
 
         private void Start()
         {
+            Shader.SetGlobalFloat(BlendAmountID, 0f);
             // Start the activation sequence
             StartCoroutine(ActivationSequence());
         }

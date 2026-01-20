@@ -32,8 +32,11 @@ public class MenuManager : MonoBehaviour
 
 
 	public void OnClickExit(){
-		Application.Quit();
-        // EditorApplication.isPlaying = false;
+        Application.Quit();
+        
+        #if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+        #endif
 	}
 
 }

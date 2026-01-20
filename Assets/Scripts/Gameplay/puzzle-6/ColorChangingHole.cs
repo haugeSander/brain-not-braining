@@ -2,6 +2,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
+using BrainNotBraining.Core;
 
 public class ColorChangingHole : MonoBehaviour
 {
@@ -109,6 +110,8 @@ public class ColorChangingHole : MonoBehaviour
 
     Cursor.lockState = CursorLockMode.None;
     Cursor.visible = true;
+
+    ProgressionManager.PendingUnlock = BrainRegion.Prefrontal;
 
     StartCoroutine(LoadNextSceneAfterDelay(5f));
 }

@@ -152,7 +152,7 @@ public class EcholocationSystem : MonoBehaviour
         if (pulseSound != null && audioSource != null)
         {
             audioSource.volume = volume;
-            audioSource.PlayOneShot(pulseSound);
+            AudioHelper.PlaySFX(pulseSound, transform.position, manualVolume);
         }
 
         // Trigger visual pulse expansion effect (shader-based)
