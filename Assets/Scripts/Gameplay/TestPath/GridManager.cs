@@ -8,7 +8,6 @@ public class GridManager : MonoBehaviour
     public int height = 10;
     public float tileSpacing = 1.1f;
 
-    public float pathLightTime = 2f;
     public Tile tilePrefab;
     private Tile[,] grid;
 
@@ -62,11 +61,12 @@ public class GridManager : MonoBehaviour
         foreach (var p in path)
             grid[p.x, p.y].SetPreview(true);
 
-        yield return new WaitForSeconds(pathLightTime);
+        yield return new WaitForSeconds(2f);
 
         // Hide path
         foreach (var p in path)
             grid[p.x, p.y].SetPreview(false);
     }
 }
+
 
