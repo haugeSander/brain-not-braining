@@ -95,12 +95,13 @@ public class PlayerLevelEightBehaviour : MonoBehaviour
 
         if (!isTakingABlock)
         {
-
+            Debug.Log("object grabbed");
             GrabBlock();
 
         }
         else
         {
+            Debug.Log("object released");
             ReleaseBlock();
         }
 
@@ -125,24 +126,7 @@ public class PlayerLevelEightBehaviour : MonoBehaviour
 
     }
 
-    // private void OnControllerColliderHit(ControllerColliderHit hit)
-    // {
-    //     // Verifica se l'oggetto colpito è la Sfera (puoi usare un Tag o il nome)
-    //     if (hit.gameObject.CompareTag("DemolitionBall")) // Assicurati di taggare la Sfera
-    //     {
-    //         // Debug.Log("Player: La Sfera è stata colpita!");
-
-    //         // Se la Sfera deve essere spinta, puoi applicare una forza qui:
-    //         Rigidbody body = hit.collider.attachedRigidbody;
-
-    //         // Esempio per spingere un oggetto (richiede Rigidbody sulla Sfera):
-    //         // if (body != null && !body.isKinematic)
-    //         // {
-    //         //     Vector3 pushDir = new Vector3(hit.moveDirection.x, 0, hit.moveDirection.z);
-    //         //     body.linearVelocity = pushDir * 5.0f; // Applica una spinta
-    //         // }
-    //     }
-    // }
+ 
 
 
     void GrabBlock()
@@ -235,26 +219,7 @@ public class PlayerLevelEightBehaviour : MonoBehaviour
 
     }
 
-    void OnCollisionEnter(Collision collision)
-    {
-        // Debug.Log("Collision Detected " + collision.gameObject);
-        // if (collision.gameObject.tag == "Door")
-        // {
-        //     HasTouchedADoor = true;
-        // }
 
-        // if (collision.gameObject.tag == "Interactable")
-        // {
-        //     HasTouchedAnInteractable = true;
-        // }
-
-        // if (collision.gameObject.tag == "DemolitionBall")
-        // {
-        //     HasTouchedDemolitionBall = true;
-        // }
-
-
-    }
 
     void OnTriggerEnter(Collider other)
     {
@@ -291,20 +256,5 @@ public class PlayerLevelEightBehaviour : MonoBehaviour
         }
     }
 
-    void OnCollisionExit(Collision collision)
-    {
-        // if (collision.gameObject.tag == "Door")
-        // {
-        //     HasTouchedADoor = false;
-        // }
 
-        // if (collision.gameObject.tag == "Interactable")
-        // {
-        //     HasTouchedAnInteractable = false;
-        // }
-        // if (collision.gameObject.tag == "DemolitionBall")
-        // {
-        //     HasTouchedDemolitionBall = false;
-        // }
-    }
 }
