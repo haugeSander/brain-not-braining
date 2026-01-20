@@ -21,7 +21,7 @@ public class StartGamePrompt : MonoBehaviour
         if (!started && Input.anyKeyDown)
         {
             started = true;
-            Debug.Log("Game Starts");
+            //Debug.Log("Game Starts");
             startText.SetActive(false);
             gridManager.StartGame();
             cameraIntroTransition.GameStart();
