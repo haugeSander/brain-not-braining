@@ -102,7 +102,7 @@ public class PlayerLevelSevenBehaviour : MonoBehaviour
             BlockTaken.transform.parent = transform;
 
             // 3. Pretend that the block is not entering the body of the player
-            BlockTaken.transform.localPosition = new Vector3(0.0f, 1.0f, 1.5f);
+            BlockTaken.transform.localPosition = new Vector3(0.0f, 0.5f, 1.5f);
 
             isTakingABlock = true;
             BlockTaken.centerOfMass = Vector3.zero;

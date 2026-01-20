@@ -5,6 +5,7 @@ public class InteractableBehaviour : MonoBehaviour
 {
     public TextMeshProUGUI HintText;
     Rigidbody rigidbody;
+    public AudioClip HitSound;
     void Start()
     {
         HintText.enabled = false;
@@ -29,7 +30,11 @@ public class InteractableBehaviour : MonoBehaviour
             rigidbody.isKinematic=true;
         }
 
-    
+        if (collision.gameObject.tag == "DemolitionBall")
+        {
+            
+            AudioHelper.PlaySFX(HitSound, transform.position, 1f);
+        }
         
             
     }

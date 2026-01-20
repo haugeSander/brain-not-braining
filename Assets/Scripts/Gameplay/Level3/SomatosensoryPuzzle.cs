@@ -370,6 +370,11 @@ public class SomatosensoryPuzzle : PuzzleBase
         }
     }
 
+    private void OnDestroy()
+    {
+        Shader.SetGlobalFloat(BlendAmountID, 0f);
+    }
+
 #if UNITY_EDITOR
         private void OnDrawGizmos()
         {
