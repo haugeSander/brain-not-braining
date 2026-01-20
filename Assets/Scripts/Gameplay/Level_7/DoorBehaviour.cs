@@ -41,8 +41,6 @@ public class DoorBeahviour : MonoBehaviour
 
     IEnumerator DoorOpeningCoroutine()
     {
-         SoundManager.instance.PlaySound(DoorOpeningClip);
-            
             transform.RotateAround(
             
             Fulcrum.transform.position,Vector3.up,200f * Time.deltaTime);

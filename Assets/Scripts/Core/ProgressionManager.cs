@@ -20,6 +20,9 @@ namespace BrainNotBraining.Core
         // Save file path (persistent across game sessions)
         private string SaveFilePath => Path.Combine(Application.persistentDataPath, "save.json");
 
+        // Pending region to unlock (set by level completion, read by BrainRegionActivator)
+        public static BrainRegion PendingUnlock { get; set; } = BrainRegion.None;
+
         // === UNITY LIFECYCLE ===
 
         private void Awake()
