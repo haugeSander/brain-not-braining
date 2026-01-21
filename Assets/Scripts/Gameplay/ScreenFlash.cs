@@ -33,6 +33,13 @@ public class ScreenFlash : MonoBehaviour
     private float whiteFadeDuration = 2f;
     private System.Action onWhiteFadeComplete;
 
+    // Void fade-from state (returning from lose / transition)
+    private bool isFadingFromVoid = false;
+    private float voidFadeFromProgress = 1f;
+    private float voidFadeFromDuration = 2f;
+    private System.Action onVoidFadeFromComplete;
+
+
     private void Start()
     {
         if (flashImage != null)
@@ -67,6 +74,27 @@ public class ScreenFlash : MonoBehaviour
             }
             return; // Don't process other fades
         }
+
+        // Handle fade FROM void (black -> transparent)
+        if (isFadingFromVoid)
+        {
+            voidFadeFromProgress -= Time.unscaledDeltaTime / voidFadeFromDuration;
+            voidFadeFromProgress = Mathf.Clamp01(voidFadeFromProgress);
+
+            Color c = Color.black;
+            c.a = voidFadeFromProgress;
+            flashImage.color = c;
+
+            if (voidFadeFromProgress <= 0f)
+            {
+                isFadingFromVoid = false;
+                onVoidFadeFromComplete?.Invoke();
+                onVoidFadeFromComplete = null;
+            }
+
+            return; // Block other effects
+        }
+
 
         // Handle white fade (win condition)
         if (isFadingToWhite)
@@ -279,5 +307,25 @@ public class ScreenFlash : MonoBehaviour
         voidFadeProgress = 0f;
         whiteFadeProgress = 0f;
         idleTime = 0f;
+    }
+
+    /// <summary>
+    /// Fade from complete black back to transparent.
+    /// Uses unscaled time to work during pauses.
+    /// </summary>
+    public void FadeFromVoid(float duration = 2f, System.Action onComplete = null)
+    {
+        // Cancel other fades
+        isFlashing = false;
+        isFading = false;
+        isFadingToVoid = false;
+        isFadingToWhite = false;
+
+        voidFadeFromDuration = duration;
+        voidFadeFromProgress = 1f;
+        isFadingFromVoid = true;
+        onVoidFadeFromComplete = onComplete;
+
+        Debug.Log($"ScreenFlash: Fading from void over {duration}s");
     }
 }
