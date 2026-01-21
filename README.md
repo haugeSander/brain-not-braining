@@ -153,16 +153,11 @@ The game will automatically create necessary folders and configuration files on 
 | Movement | WASD | Move the mouse character |
 | Jump | Space | Jump |
 | Ability | E | Start Echolocaition and Toggle vision modes (Puzzle 3 and 4) |
-| Interact | F | Toggle vision modes (Puzzle 3 and 4) |
+| Interact | F | Move boxes |
 | Pause | Escape | Open pause menu |
 | Graphics Debug | G | Open graphics comparison screen |
 | Cheat Mode | F | Enable debugging shortcuts (if cheats enabled). Final puzzle uses T instead |
 | Skip Cutscene | S | Skip intro and transition cutscenes |
-
-### Puzzle-Specific Controls
-
-- **Puzzle 0**: Click timed circles, press Space for breathing control
-- **Puzzle 6**: WASD to navigate tiles, memorize the lit path
 
 ---
 
@@ -260,11 +255,11 @@ Assets/
 
 ---
 
-## 📊 Development Progress
+## Development Progress
 
 ### Current Status: **Early Beta**
 
-The core gameplay loop is complete with all 8 puzzles implemented and functional. Current focus is on polishing, difficulty tuning, and bug fixing.
+The core gameplay loop is complete with all 7 puzzles implemented and functional. Current focus is on polishing, difficulty tuning, and bug fixing.
 
 ### Completed Features
 
